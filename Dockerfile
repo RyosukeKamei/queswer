@@ -1,4 +1,4 @@
-FROM php:7-apache
+FROM php:5.6-apache
 
 
 ## Update packages
@@ -31,6 +31,10 @@ RUN cat /usr/src/php/php.ini-development | sed 's/^;\(date.timezone.*\)/\1 \"Asi
 RUN wget https://phar.phpunit.de/phpunit.phar
 RUN chmod +x phpunit.phar
 RUN mv phpunit.phar /usr/local/bin/phpunit
+
+## log
+RUN mkdir /var/log/fuel
+RUN chmod 777 /var/log/fuel
 
 ## Enable mod_rewrite
 RUN a2enmod rewrite
