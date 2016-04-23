@@ -26,6 +26,7 @@ class Create_rounds
                 'table' => 'examinations',
                 'column' => 'id',
             ],
+            'on_update' => 'CASCADE',
             'on_delete' => 'CASCADE'
         ]);	
 	}

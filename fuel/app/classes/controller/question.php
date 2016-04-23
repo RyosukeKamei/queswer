@@ -24,21 +24,6 @@ class Controller_Question extends Controller_Template
 		$this->template->content = View::forge('question/view', $data);
 
 	}
-	
-	public function action_convert($id = null)
-	{
-	    is_null($id) and Response::redirect('question');
-	
-	    if ( ! $data['before_question'] = Model_Beforequestion::find($id))
-	    {
-	        Session::set_flash('error', 'Could not find question #'.$id);
-	        Response::redirect('question');
-	    }
-	
- 	    $this->template->title = "Question";
- 	    $this->template->content = View::forge('question/convert', $data);
-	
-	}	
 
 	public function action_create()
 	{
@@ -50,11 +35,13 @@ class Controller_Question extends Controller_Template
 			{
 				$question = Model_Question::forge(array(
 					'question_number' => Input::post('question_number'),
+					'question_title' => Input::post('question_title'),
 					'question_body' => Input::post('question_body'),
 					'question_commentary' => Input::post('question_commentary'),
 					'first_category_id' => Input::post('first_category_id'),
 					'divition_id' => Input::post('divition_id'),
 					'round_id' => Input::post('round_id'),
+					'prefix_id' => Input::post('prefix_id'),
 					'deleted_at' => Input::post('deleted_at'),
 				));
 
@@ -96,11 +83,13 @@ class Controller_Question extends Controller_Template
 		if ($val->run())
 		{
 			$question->question_number = Input::post('question_number');
+			$question->question_title = Input::post('question_title');
 			$question->question_body = Input::post('question_body');
 			$question->question_commentary = Input::post('question_commentary');
 			$question->first_category_id = Input::post('first_category_id');
 			$question->divition_id = Input::post('divition_id');
 			$question->round_id = Input::post('round_id');
+			$question->prefix_id = Input::post('prefix_id');
 			$question->deleted_at = Input::post('deleted_at');
 
 			if ($question->save())
@@ -121,11 +110,13 @@ class Controller_Question extends Controller_Template
 			if (Input::method() == 'POST')
 			{
 				$question->question_number = $val->validated('question_number');
+				$question->question_title = $val->validated('question_title');
 				$question->question_body = $val->validated('question_body');
 				$question->question_commentary = $val->validated('question_commentary');
 				$question->first_category_id = $val->validated('first_category_id');
 				$question->divition_id = $val->validated('divition_id');
 				$question->round_id = $val->validated('round_id');
+				$question->prefix_id = $val->validated('prefix_id');
 				$question->deleted_at = $val->validated('deleted_at');
 
 				Session::set_flash('error', $val->error());

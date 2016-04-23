@@ -11,8 +11,8 @@ class Create_admins
 			'user_id' => array('constraint' => 255, 'type' => 'varchar'),
 			'password' => array('constraint' => 255, 'type' => 'varchar'),
 			'examination_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
-			'deleted_at' => array('constraint' => 11, 'type' => 'int'),
-			'created_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
+			'deleted_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
+		    'created_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 			'updated_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 
 		), array('id'));

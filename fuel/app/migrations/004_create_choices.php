@@ -13,7 +13,7 @@ class Create_choices
 			'choice_num' => array('constraint' => 11, 'type' => 'int'),
 			'choice_body' => array('type' => 'text'),
 			'correct_flag' => array('type' => 'boolean'),
-			'deleted_at' => array('constraint' => 11, 'type' => 'int'),
+			'deleted_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 			'created_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 			'updated_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 

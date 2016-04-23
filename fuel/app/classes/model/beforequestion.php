@@ -6,12 +6,12 @@ class Model_Beforequestion extends Model
 	protected static $_properties = array(
 		'id',
 		'question_number',
-		'question_title',
-	    'question_body',
+		'question_body',
 		'question_commentary',
 		'first_category_id',
 		'divition_id',
 		'round_id',
+		'prefix_id',
 		'deleted_at',
 		'created_at',
 		'updated_at',
@@ -37,6 +37,7 @@ class Model_Beforequestion extends Model
 		$val->add_field('first_category_id', 'First Category Id', 'required|valid_string[numeric]');
 		$val->add_field('divition_id', 'Divition Id', 'required|valid_string[numeric]');
 		$val->add_field('round_id', 'Round Id', 'required|valid_string[numeric]');
+		$val->add_field('prefix_id', 'Prefix Id', 'required|valid_string[numeric]');
 		$val->add_field('deleted_at', 'Deleted At', 'required|valid_string[numeric]');
 
 		return $val;

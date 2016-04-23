@@ -4,6 +4,9 @@
 	<strong>Question number:</strong>
 	<?php echo $question->question_number; ?></p>
 <p>
+	<strong>Question title:</strong>
+	<?php echo $question->question_title; ?></p>
+<p>
 	<strong>Question body:</strong>
 	<?php echo $question->question_body; ?></p>
 <p>
@@ -18,6 +21,9 @@
 <p>
 	<strong>Round id:</strong>
 	<?php echo $question->round_id; ?></p>
+<p>
+	<strong>Prefix id:</strong>
+	<?php echo $question->prefix_id; ?></p>
 <p>
 	<strong>Deleted at:</strong>
 	<?php echo $question->deleted_at; ?></p>

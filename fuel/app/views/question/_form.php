@@ -8,6 +8,12 @@
 
 		</div>
 		<div class="form-group">
+			<?php echo Form::label('Question title', 'question_title', array('class'=>'control-label')); ?>
+
+				<?php echo Form::input('question_title', Input::post('question_title', isset($question) ? $question->question_title : ''), array('class' => 'col-md-4 form-control', 'placeholder'=>'Question title')); ?>
+
+		</div>
+		<div class="form-group">
 			<?php echo Form::label('Question body', 'question_body', array('class'=>'control-label')); ?>
 
 				<?php echo Form::textarea('question_body', Input::post('question_body', isset($question) ? $question->question_body : ''), array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'Question body')); ?>
@@ -35,6 +41,12 @@
 			<?php echo Form::label('Round id', 'round_id', array('class'=>'control-label')); ?>
 
 				<?php echo Form::input('round_id', Input::post('round_id', isset($question) ? $question->round_id : ''), array('class' => 'col-md-4 form-control', 'placeholder'=>'Round id')); ?>
+
+		</div>
+		<div class="form-group">
+			<?php echo Form::label('Prefix id', 'prefix_id', array('class'=>'control-label')); ?>
+
+				<?php echo Form::input('prefix_id', Input::post('prefix_id', isset($question) ? $question->prefix_id : ''), array('class' => 'col-md-4 form-control', 'placeholder'=>'Prefix id')); ?>
 
 		</div>
 		<div class="form-group">
