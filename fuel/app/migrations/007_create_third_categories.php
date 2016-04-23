@@ -11,7 +11,7 @@ class Create_third_categories
 			'third_category_name' => array('constraint' => 255, 'type' => 'varchar', '0' => true),
 			'top_category_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
 			'deleted_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
-		    'created_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
+		    'created_at' => array('constraint' => 11, 'type' => 'int', 'null' => true), 
 			'updated_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 
 		), array('id'));
