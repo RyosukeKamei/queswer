@@ -9,7 +9,7 @@ class Create_questions
 		\DBUtil::create_table('questions', array(
 			'id' => array('constraint' => 11, 'type' => 'int', 'auto_increment' => true, 'unsigned' => true),
 			'question_number' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
-			'question_title' => array('constraint' => 255, 'type' => 'varchar', '0' => true),
+// 			'question_title' => array('constraint' => 255, 'type' => 'varchar', '0' => true),
 			'question_body' => array('type' => 'text'),
 			'question_commentary' => array('type' => 'text'),
 			'first_category_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
