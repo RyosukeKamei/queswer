@@ -25,8 +25,9 @@ mysql:
 # FuelPHP application (PHP7, Apache)
 application:
   container_name: fuel-app
-  build: .
-  dockerfile: ./Dockerfile
+  #build: .
+  #dockerfile: ./Dockerfile
+  image: queswer_application
   tty: false
   volumes_from:
     - data
