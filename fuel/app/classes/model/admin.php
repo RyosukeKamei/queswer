@@ -30,7 +30,7 @@ class Model_Admin extends Model
 		$val->add_field('user_id', 'User Id', 'required|max_length[255]');
 		$val->add_field('password', 'Password', 'required|max_length[255]');
 		$val->add_field('examination_id', 'Examination Id', 'required|valid_string[numeric]');
-		$val->add_field('deleted_at', 'Deleted At', 'required|valid_string[numeric]');
+// 		$val->add_field('deleted_at', 'Deleted At', 'required|valid_string[numeric]');
 
 		return $val;
 	}

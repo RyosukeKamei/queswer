@@ -20,12 +20,6 @@
 
 		</div>
 		<div class="form-group">
-			<?php echo Form::label('Deleted at', 'deleted_at', array('class'=>'control-label')); ?>
-
-				<?php echo Form::input('deleted_at', Input::post('deleted_at', isset($admin) ? $admin->deleted_at : ''), array('class' => 'col-md-4 form-control', 'placeholder'=>'Deleted at')); ?>
-
-		</div>
-		<div class="form-group">
 			<label class='control-label'>&nbsp;</label>
 			<?php echo Form::submit('submit', 'Save', array('class' => 'btn btn-primary')); ?>		</div>
 	</fieldset>

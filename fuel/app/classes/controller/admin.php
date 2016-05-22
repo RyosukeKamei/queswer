@@ -33,11 +33,15 @@ class Controller_Admin extends Controller_Template
 
 			if ($val->run())
 			{
+// 				$password = Input::post('password');
+// 				var_dump($password);
+// 				var_dump(password_hash($password, PASSWORD_DEFAULT, array('cost' => $this->cost))):
+								
 				$admin = Model_Admin::forge(array(
 					'user_id' => Input::post('user_id'),
 					'password' => Input::post('password'),
 					'examination_id' => Input::post('examination_id'),
-					'deleted_at' => Input::post('deleted_at'),
+// 					'deleted_at' => Input::post('deleted_at'),
 				));
 
 				if ($admin and $admin->save())
@@ -133,6 +137,17 @@ class Controller_Admin extends Controller_Template
 
 		Response::redirect('admin');
 
+	}
+	
+	public function action_login()
+	{
+		if (!is_null(Input::post('user_id')) && !is_null(Input::post('password')))
+		{
+			Response::redirect('round/index/3');
+		}
+		
+		$this->template->title = "Admins";
+		$this->template->content = View::forge('admin/login');
 	}
 
 }
