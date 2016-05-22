@@ -150,6 +150,275 @@ class Controller_Question extends Controller_Template
 
     }
     
+    /**
+     * action_solve
+     * 解答し、次の問題を取得
+     * 
+     * パターン1 初めて問題に取り組む場合
+     * 入力 $round_id = 15 $answer_id = 0, $answer = 0
+     * answers（1レコード）とanswerdetails（80レコード）を生成
+     * １問目を取得（answer_idから、answerカラムがnullで、一番若いレコードを取得）
+     * 
+     * パターン2 一覧画面から「続き」をクリックした場合
+     * 入力 $round_id = 0 $answer_id = {int}, $answer = null
+     * answer_idから、answerカラムがnullで、一番若いレコードを取得
+     * 
+     * パターン3 問題画面で解答した場合
+     * 入力 $round_id = 0 $answer_id = {int}, $answer = {int}
+     * answer_idから、answerカラムがnullで、一番若いレコードにanswerの値を入れる
+     * answer_idから、answerカラムがnullで、一番若いレコードを取得
+     * 
+     * @param int $round_id 実施回 平成28年度春応用情報技術者試験の場合は15
+     * @param int $answer_id 解答を格納するテーブルのヘッダID
+     * @param int $answer 答え（1:ア 2:イ 3:ウ 4:エ）
+     */
+    public function action_solve($round_id, $answer_id = 0, $answer = 0) {
+        /*
+         * 一覧画面から問題画面に遷移する前に初期化する
+         * 例
+         * round_id = 15 平成28年度春応用情報技術者試験
+         * answer_id = 1 回答ヘッダのid nullの場合は初回なので初期化する
+         */
+
+        /*
+         * 答えが入力された場合は
+         * 解答する
+         * 
+         * たぼっちへ
+         * ここは最後
+         */
+        if($answer_id && $answer) {
+            /*
+             * answerdetailsのanswerにデータが入る
+             */
+            $this->answer($answer_id, $answer);
+        }
+
+        
+        /*
+         * 1. 初めて問題を解く場合
+         * 初期化をしてanswer_idを取得
+         * 2. 続きをする場合
+         * ブラウザ入力された$answer_idそのまま
+         * 
+         * たぼっちへ
+         * ここがはじめ
+         */
+        if(!$answer_id) {
+            $answer_id = answer_init($round_id);
+        }
+        
+        /*
+         * 次の問題を取得
+         * answer_idからanswerdetailsを見て、answerにデータがなく一番若いレコードを取得
+         * 
+         * たぼっちへ
+         * ここが２つ目
+         */
+        $answers = $this->get_next_question($answer_id);
+        
+        
+    }
+    
+    /**
+     * answer
+     * answerdetailsのanswerにデータが入る
+     * 
+     * answer_idからanswerdetailを取得
+     * WHERE句はanswer_idとanswerがNULLで一番若いレコード
+     * 
+     * @param int $answer_id
+     * @param int $answer
+     */
+    private function answer($answer_id, $answer) {
+        /*
+         * UPDATE文作成
+         */
+        
+        /*
+         * UPDATE文実行
+         */
+    }
+    
+    /**
+     * answer_init
+     * 答えが存在しなければ、「新規」なので
+     * answer（1レコード）とanswerdetail（80レコード）を生成
+     * 最後にanswer_idを返す
+     * 
+     * @param int $round_id 問題の回数（平成28年度春応用情報技術者試験は15）
+     * @return int $answer_id 次の問題ID
+     */
+    private function answer_init($round_id) {
+        /*
+         * $pdoを取得
+         * トランザクションとQuesitonをINSERTした後のidを取得
+         */
+        Database_Connection::instance()->connect();
+        $pdo = Database_Connection::instance()->connection();
+        $pdo->beginTransaction();
+        
+        /*
+         * $round_idから、前回のfrequencyを取得
+         * 「前回の」なので + 1して「今回」にする
+         */
+        $frequency = $this->get_frequency ( $round_id ) + 1;
+        
+        /*
+         * create_answers メソッド
+         * ヘッダの1レコード生成
+         */
+        if ($this->create_answers ( $round_id, $frequency )) {
+            /*
+             * answer_idは問題文を取得するのに利用する
+             */
+            $answer_id = $pdo->lastInsertId ( 'id' );
+            
+            /*
+             * create_answer_details メソッド
+             * answerdetail（80レコード）を生成
+             */
+            if (! $this->create_answer_details ( $answer_id )) {
+                /*
+                 * レコードができなかったらFatal Error
+                 * 本来ユニットテストで対応するからありえないはず
+                 *
+                 */
+                Session::set_flash ( 'error', 'FATAL ERROR answerdetailsレコード生成ができませんでした。 ' );
+            } else {
+                /*
+                 * 解答ヘッダ（answers）と解答詳細（answerdetails）が生成されたら成功なので
+                 * answer_idを返す
+                 */
+                $pdo->commit();
+                return $answer_id;
+            }
+        } else {
+            /*
+             * レコードができなかったらFatal Error
+             * 本来ユニットテストで対応するからありえないはず
+             */
+            Session::set_flash ( 'error', 'FATAL ERROR answersレコード生成ができませんでした。 ' );
+        }
+        /*
+         * 正しければ、コミットされてreturnされる
+         * ここまできたらエラーってこと
+         * ロールバックしてリダイレクト
+         */
+        $pdo->rollback();
+        Response::redirect ( 'question' );
+    }
+    
+    /**
+     * get_frequency
+     * answerテーブルをround_idとuser_idでフィルタし
+     * その実施回が何回目かを取得
+     * 
+     * @param int $round_id 実際回（平成28年度応用情報技術者試験 15）
+     * @return int $frequency 実施回数（平成28年度応用情報技術者試験 2回目）
+     */
+    public function get_frequency($round_id) {
+        $frequency = 0;
+        
+        /*
+         * たぼっちへ
+         * コーディングしてね
+         */
+        
+        /*
+         * SELECT文
+         * 
+         */
+        
+        /*
+         * 実行
+         */
+        
+        return $frequency;
+    }
+    
+    /**
+     * create_answers
+     * answerテーブルを生成
+     * 
+     * @param int $round_id 実際回（平成28年度応用情報技術者試験 15）
+     * @param int $frequency 実施回数（平成28年度応用情報技術者試験 2回目）
+     * @return boolean $success INSERT文成功したかどうか
+     */
+    public function create_answers( $round_id, $frequency ) {
+        /*
+         * たぼっちへ
+         * コーディングしてね
+         */
+        $success = false;
+        
+        /*
+         * INSERT文
+         */
+        
+        /*
+         * INSERT文実行
+         */
+        
+        return $success;
+    }
+    
+    /**
+     * create_answer_details
+     * answerdetailテーブルを生成
+     * answerはnullでquestion_numだけ
+     * 80レコード
+     * 
+     * @param unknown $answer_id
+     * @return boolean
+     */
+    public function create_answer_details($answer_id) {
+        /*
+         * たぼっちへ
+         * コーディングしてね
+         */
+        $success = false;
+        
+        /*
+         * 80レコード生成
+         */
+        $sql = "";
+        for($question_num = 1; $question_num <= 80; $question_num++) {
+            /*
+             * 1レコードずつ
+             */
+            
+        }
+        
+        /*
+         * SQL実行
+         */
+        
+        return $success;
+    }
+    
+    /**
+     * get_next_question
+     * 次の問題を取得
+     * answer_idとanswerがnullで一番若いレコードが次の問題
+     * 
+     * @param int $answer_id 
+     * @return array $next_questions 次の問題文や選択肢が格納された配列
+     */
+    public function get_next_question($answer_id) {
+        $next_questions = array();
+        
+        /*
+         * SELECT生成
+         */
+        
+        /*
+         * SELECT実行
+         */
+        
+        return $next_questions;
+    }
+    
     
     /**
      * action_convert
@@ -248,7 +517,7 @@ class Controller_Question extends Controller_Template
          */
         $data['correct_flag'] = $this->covert_correct($before_questions->question_commentary);
         
-        $this->template->title = "Questions";
+        $this->template->title = "問題コンバート";
         $this->template->content = View::forge('question/convert', $data);
     
     }

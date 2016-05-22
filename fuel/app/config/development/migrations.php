@@ -21,6 +21,8 @@ return array(
         12 => '013_create_organizations',
         13 => '014_create_prefixes',
         14 => '015_create_beforequestions',
+        15 => '016_create_answers',
+        16 => '017_create_answerdetails',
       ),
     ),
     'module' => 

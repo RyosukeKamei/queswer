@@ -1,6 +1,3 @@
-<h2>問題コンバート</h2>
-<br>
-
 <?php echo Form::open(array("class"=>"form-horizontal")); ?>
 
 	<fieldset>
