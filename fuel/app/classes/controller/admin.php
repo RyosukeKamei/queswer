@@ -1,15 +1,57 @@
 <?php
+/**
+ * Controller_Admin
+ * 管理者CRUD
+ * scaffoldベース
+ * 
+ * プログラミング規約は下記のURLを参照
+ * http://sr2s.org/2016/03/Credo.html
+ * 
+ *
+ * 
+ * @author sr2smail
+ *
+ */
 class Controller_Admin extends Controller_Template
 {
 
-	public function action_index()
+	/**
+	 * action_index
+	 * Adminの一覧
+	 * 
+	 * scaffoldそのまま
+	 * 
+	 */
+    public function action_index()
 	{
-		$data['admins'] = Model_Admin::find('all');
-		$this->template->title = "Admins";
+		/*
+		 * 全件取得
+		 */
+	    $data['admins'] = Model_Admin::find('all');
+		
+	    /*
+	     * 画面タイトルは日本語に
+	     */
+	    $this->template->title = "管理者";
+	    
+	    /*
+	     * （みたらわかるけど最初だけ書いときます）
+	     * テンプレート呼び出し
+	     */
 		$this->template->content = View::forge('admin/index', $data);
 
 	}
 
+	/**
+	 * action_view
+	 * 詳細画面
+	 * scaffoldそのまま
+	 * 
+	 * 廃止予定
+	 * 編集画面があれば良い
+	 * 
+	 * @param string $id
+	 */
 	public function action_view($id = null)
 	{
 		is_null($id) and Response::redirect('admin');
@@ -25,20 +67,48 @@ class Controller_Admin extends Controller_Template
 
 	}
 
+	/**
+	 * action_create
+	 * 登録
+	 * 
+	 * scaffoldベースにカスタマイズ
+	 * ごめん、blowfishって話をしたけど
+	 * Fuelphpにsimpleauthって機能あった（笑）
+	 * http://fuelphp.jp/docs/1.7/packages/auth/simpleauth/usage.html
+	 * ↓
+	 * プログラミング規約
+	 * FuelPHPの作法に従い、極力FuelPHPのライブラリを使おう！コーディング負荷を軽減
+	 * 
+	 */
 	public function action_create()
 	{
 		if (Input::method() == 'POST')
 		{
-			$val = Model_Admin::validate('create');
+			/*
+			 * $valだと「値」と混同するので$validation
+			 * （Fuelのデフォルト$valだけどここは変えておくことにしようねー）
+			 * ↓
+			 * 【プログラミング規約】
+			 * 変数名・関数名は「短いコメント」と思い、明確で具体的で誤解のない単語を選び、接頭辞・接尾辞をうまく使おう！
+			 */
+		    $validation = Model_Admin::validate('create');
 
-			if ($val->run())
+			if ($validation->run())
 			{
+                /*
+                 * パスワードはsimpleauthを使う
+                 * FuelPHPの標準機能だからテスト自動化は一旦不要
+                 */
 // 				$password = Input::post('password');
 // 				var_dump($password);
 // 				var_dump(password_hash($password, PASSWORD_DEFAULT, array('cost' => $this->cost))):
 								
 				$admin = Model_Admin::forge(array(
-					'user_id' => Input::post('user_id'),
+					/*
+					 * 【プログラミング規約】
+					 * データベースのカラム名・変数名・inputタグのname属性は統一
+					 */
+				    'user_id' => Input::post('user_id'),
 					'password' => Input::post('password'),
 					'examination_id' => Input::post('examination_id'),
 // 					'deleted_at' => Input::post('deleted_at'),
@@ -46,27 +116,49 @@ class Controller_Admin extends Controller_Template
 
 				if ($admin and $admin->save())
 				{
-					Session::set_flash('success', 'Added admin #'.$admin->id.'.');
+					/*
+					 * ブラウザに表示する成功メッセージ
+					 * メッセージを一元管理をするかは後ほど検討
+					 */
+				    Session::set_flash('success', '管理者を追加しました。 #'.$admin->id.'.');
 
 					Response::redirect('admin');
 				}
 
 				else
 				{
-					Session::set_flash('error', 'Could not save admin.');
+					/*
+					 * SQLエラーなど（ここは起こりえないはず）
+					 */
+				    Session::set_flash('error', '管理者を追加できませんでした。');
 				}
 			}
 			else
 			{
-				Session::set_flash('error', $val->error());
+				/*
+				 * バリデーションエラー
+				 * 
+				 */
+			    Session::set_flash('error', $validation->error());
 			}
 		}
 
-		$this->template->title = "Admins";
+		/*
+		 * 画面名
+		 */
+		$this->template->title = "管理者作成";
 		$this->template->content = View::forge('admin/create');
 
 	}
 
+	/**
+	 * action_edit
+	 * 管理者編集
+	 * 
+	 * action_createを参考に変更
+	 * 
+	 * @param int $id 管理者ID
+	 */
 	public function action_edit($id = null)
 	{
 		is_null($id) and Response::redirect('admin');
