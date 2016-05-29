@@ -18,7 +18,7 @@ class Create_organizations
 		 * top_categories と organicationsをJOIN
 		 * 新しくカラムを追加してJOINする
 		 */
-		\DBUtil::add_foreign_key('top_categories', [
+		\DBUtil::add_foreign_key('topcategories', [
 		        'constraint' => 'index_top_categories_to_organications',
 		        'key' => 'organization_id',
 		        'reference' => [
