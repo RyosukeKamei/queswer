@@ -8,7 +8,7 @@ class Model_Question extends Model
 		'question_number',
 		'question_body',
 		'question_commentary',
-		'first_category_id',
+		'firstcategory_id',
 		'divition_id',
 		'round_id',
 		'prefix_id',
@@ -35,7 +35,7 @@ class Model_Question extends Model
             $val->add_field('question_number', '問題番号', 'required|valid_string[numeric]');              // 固定値なのであまり関係ない
            	$val->add_field('conveted_question_body', 'コンバートした問題文', 'required');                              // 問題文は未入力チェックのみ
             $val->add_field('question_commentary', '解説', 'required');                                   // 固定値なのであまり関係ない
-            $val->add_field('first_category_id', 'First Category Id', 'required|valid_string[numeric]'); // 固定値なのであまり関係ない
+            $val->add_field('firstcategory_id', 'First Category Id', 'required|valid_string[numeric]'); // 固定値なのであまり関係ない
             $val->add_field('divition_id', 'Divition Id', 'required|valid_string[numeric]');             // 固定値なのであまり関係ない
             $val->add_field('round_id', 'Round Id', 'required|valid_string[numeric]');                   // 固定値なのであまり関係ない
             $val->add_field('prefix_id', 'Prefix Id', 'required|valid_string[numeric]');                 // 固定値なのであまり関係ない
@@ -43,5 +43,11 @@ class Model_Question extends Model
 		return $val;
 	}
 
-
+	/*
+	 * round
+	 *  examination
+	 * divition
+	 * をJOINするために追加
+	 */
+	protected static $_belongs_to = array('round', 'divition');
 }

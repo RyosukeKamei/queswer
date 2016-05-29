@@ -12,7 +12,7 @@ class Create_questions
 // 			'question_title' => array('constraint' => 255, 'type' => 'varchar', '0' => true),
 			'question_body' => array('type' => 'text'),
 			'question_commentary' => array('type' => 'text'),
-			'first_category_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
+			'firstcategory_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
 			'divition_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
 			'round_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
 			'prefix_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),

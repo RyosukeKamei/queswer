@@ -2,6 +2,12 @@
 class Controller_Question extends Controller_Template
 {
 
+    /**
+     * action_index
+     * 問題一覧
+     * 
+     * 管理側で使う
+     */
     public function action_index()
     {
         $data['questions'] = Model_Question::find('all');
@@ -10,6 +16,14 @@ class Controller_Question extends Controller_Template
 
     }
 
+    /**
+     * action_view
+     * 問題詳細
+     * 
+     * 不要
+     * 
+     * @param int $id 問題ID
+     */
     public function action_view($id = null)
     {
         is_null($id) and Response::redirect('question');
@@ -25,6 +39,13 @@ class Controller_Question extends Controller_Template
 
     }
 
+    /**
+     * action_create
+     * 問題生成
+     * 
+     * @TODO
+     * 選択肢（choeice）も一緒にINSERTするように改造
+     */
     public function action_create()
     {
         if (Input::method() == 'POST')
@@ -68,6 +89,15 @@ class Controller_Question extends Controller_Template
 
     }
 
+    /**
+     * action_edit
+     * 問題編集
+     * 
+     * @TODO
+     * 選択肢（choeice）も一緒にUPDATEするように改造
+     * 
+     * @param int $id 問題ID
+     */
     public function action_edit($id = null)
     {
         is_null($id) and Response::redirect('question');
@@ -130,6 +160,15 @@ class Controller_Question extends Controller_Template
 
     }
 
+    /**
+     * action_delete
+     * 問題削除
+     * 
+     * @todo
+     * 論理削除に変更
+     * 
+     * @param int $id 問題ID
+     */
     public function action_delete($id = null)
     {
         is_null($id) and Response::redirect('question');
@@ -150,9 +189,87 @@ class Controller_Question extends Controller_Template
 
     }
     
+    public function action_commentary($question_number = null, $round_id = null)
+    {
+        /*
+         * $question_numberがない場合、問題一覧にリダイレクト
+         * 
+         * @todo
+         * リダイレクト先は後から考える
+         * 候補 round/index/3？
+         */
+        is_null($question_number) and Response::redirect('question');
+        
+        /*
+         * データ取得
+         * 
+         * データ1レコードだけどfindを使うためforeachが必要
+         * find_byに2つのWHEREを指定できない（？）ため面倒なやり方をしてる
+         */ 
+        if ( ! $data['question'] =
+            Model_Question::query()
+            ->related('round')
+            ->related('round.examination')
+            ->related('divition')
+            ->where('question_number', $question_number)
+            ->where('round_id', $round_id)
+            ->get_one()
+        )
+        {
+            /*
+             * ほとんどありえないエラー（SQLエラー）
+             */
+            Session::set_flash(
+                  'error'
+                , '問題取得（questionsテーブル）に失敗しました。 問題番号 '.$question_number);
+            
+            /*
+             * @todo
+             * リダイレクト先は後から考える
+             * 候補 round/index/3？
+             */
+             Response::redirect('question');
+        } else {
+            /*
+             * 成功の場合は選択肢を取得
+             */
+            if ( ! $data['choice'] = Model_Choice::find_by('question_id', $data['question']->id))
+            {
+                var_dump($data['question']->id);exit();
+                /*
+                 * ほとんどありえないエラー（SQLエラー）
+                 */
+                Session::set_flash(
+                      'error'
+                    , '選択肢取得（choicesテーブル）に失敗しました。 問題番号 '.$question_number);
+                
+                /*
+                 * @todo
+                 * リダイレクト先は後から考える
+                 * 候補 round/index/3？
+                 */
+                 Response::redirect('question');
+            }
+        }
+        /*
+         * タイトルは加工
+         */
+        $this->template->title = 
+                  $data['question']->round->round_name
+            .' ' .$data['question']->round->examination->examination_name
+            .' 問'.$data['question']->question_number
+            
+        ;
+        $this->template->content = View::forge('question/commentary', $data, false);
+        
+    }
+    
     /**
      * action_solve
      * 解答し、次の問題を取得
+     * 
+     * @todo
+     * 田保さんへ詳細設計を書いてみました〜
      * 
      * パターン1 初めて問題に取り組む場合
      * 入力 $round_id = 15 $answer_id = 0, $answer = 0
@@ -551,7 +668,7 @@ class Controller_Question extends Controller_Template
                     'question_number'     => Input::post('question_number'),         // 問題番号（固定）
                     'question_body'       => Input::post('conveted_question_body'),  // 問題本文
                     'question_commentary' => Input::post('question_commentary'),     // 問題解説（固定）
-                    'first_category_id'   => Input::post('first_category_id'),       // 小項目（固定）
+                    'firstcategory_id'    => Input::post('firstcategory_id'),        // 小項目（固定）
                     'divition_id'         => Input::post('divition_id'),             // 問題区分（固定）
                     'round_id'            => Input::post('round_id'),                // 問題実施（固定）
                     'prefix_id'           => Input::post('prefix_id'),               // 選択肢の名称（固定）

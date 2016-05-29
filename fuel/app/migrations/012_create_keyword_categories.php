@@ -8,7 +8,7 @@ class Create_keyword_categories
 	{
 		\DBUtil::create_table('keyword_categories', array(
 			'id' => array('constraint' => 11, 'type' => 'int', 'auto_increment' => true, 'unsigned' => true),
-			'first_category_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
+			'firstcategory_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
 			'keyword_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
 			'deleted_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 		    'created_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
@@ -20,9 +20,9 @@ class Create_keyword_categories
 		 */
 		\DBUtil::add_foreign_key('keyword_categories', [
 		        'constraint' => 'index_keyword_categories_to_first_categories',
-		        'key' => 'first_category_id',
+		        'key' => 'firstcategory_id',
 		        'reference' => [
-		                'table' => 'first_categories',
+		                'table' => 'firstcategories',
 		                'column' => 'id',
 		        ],
 		        'on_update' => 'CASCADE',

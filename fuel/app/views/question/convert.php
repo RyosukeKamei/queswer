@@ -91,10 +91,10 @@
 
 		</div>
 		<div class="form-group">
-			<?php echo Form::label('小項目ID', 'first_category_id', array('class'=>'control-label')); ?>
+			<?php echo Form::label('小項目ID', 'firstcategory_id', array('class'=>'control-label')); ?>
 
-				<?php echo Form::input('first_category_id'
-				                       , $before_questions->first_category_id
+				<?php echo Form::input('firstcategory_id'
+				                       , $before_questions->firstcategory_id
 				                       , array('class' => 'col-md-4 form-control', 'placeholder'=>'小項目ID', "readonly"=>"readonly")); ?>
 
 		</div>
