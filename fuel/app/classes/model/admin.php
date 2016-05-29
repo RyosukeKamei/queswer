@@ -5,9 +5,14 @@ class Model_Admin extends Model
 {
 	protected static $_properties = array(
 		'id',
-		'user_id',
+	    'username',
 		'password',
-		'examination_id',
+ 		'examination_id',
+ 		'group',
+		'email',
+ 		'last_login',
+		'login_hash',
+		'profile_fields',
 		'deleted_at',
 		'created_at',
 		'updated_at',
@@ -43,10 +48,10 @@ class Model_Admin extends Model
 		 * 日本語の方が良いかも
 		 * トライアンドエラーしてみて
 		 */
-	    $val->add_field('user_id', 'User Id', 'required|max_length[255]');
-		$val->add_field('password', 'Password', 'required|max_length[255]');
+	    $val->add_field('user_id',        'User Id',        'required|max_length[255]');
+		$val->add_field('password',       'Password',       'required|max_length[255]');
 		$val->add_field('examination_id', 'Examination Id', 'required|valid_string[numeric]');
-// 		$val->add_field('deleted_at', 'Deleted At', 'required|valid_string[numeric]');
+// 		$val->add_field('deleted_at',     'Deleted At',     'required|valid_string[numeric]');
 
 		return $val;
 	}

@@ -1,20 +1,20 @@
-<h2>Listing <span class='muted'>Admins</span></h2>
+<h2>管理者一覧</span></h2>
 <br>
 <?php if ($admins): ?>
 <table class="table table-striped">
 	<thead>
 		<tr>
-			<th>User id</th>
-			<th>Password</th>
-			<th>Examination id</th>
-			<th>Deleted at</th>
+			<th>ユーザー名</th>
+			<th>パスワード</th>
+			<th>試験ID</th>
+			<th>削除日</th>
 			<th>&nbsp;</th>
 		</tr>
 	</thead>
 	<tbody>
 <?php foreach ($admins as $item): ?>		<tr>
 
-			<td><?php echo $item->user_id; ?></td>
+			<td><?php echo $item->username; ?></td>
 			<td><?php echo $item->password; ?></td>
 			<td><?php echo $item->examination_id; ?></td>
 			<td><?php echo $item->deleted_at; ?></td>
@@ -33,6 +33,6 @@
 <p>No Admins.</p>
 
 <?php endif; ?><p>
-	<?php echo Html::anchor('admin/create', 'Add new Admin', array('class' => 'btn btn-success')); ?>
+	<?php echo Html::anchor('admin/create', '新規追加', array('class' => 'btn btn-success')); ?>
 
 </p>
