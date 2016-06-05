@@ -32,5 +32,10 @@ class Model_Secondcategory extends Model
 
 		return $val;
 	}
-
+	
+	/*
+	 * thirdcategoryをJOIN
+	 */
+	protected static $_belongs_to = array('thirdcategory');
+	
 }

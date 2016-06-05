@@ -32,5 +32,9 @@ class Model_Thirdcategory extends Model
 
 		return $val;
 	}
-
+	
+	/*
+	 * topcategoryをJOIN
+	 */
+	protected static $_belongs_to = array('topcategory');
 }

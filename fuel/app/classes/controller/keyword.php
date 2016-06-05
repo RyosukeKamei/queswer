@@ -2,7 +2,13 @@
 class Controller_Keyword extends Controller_Template
 {
 
-	public function action_index()
+	/**
+	 * action_index
+	 * キーワード画面の一覧
+	 * 
+	 * 権限は管理者のみ
+	 */
+    public function action_index()
 	{
 		$data['keywords'] = Model_Keyword::find('all');
 		$this->template->title = "Keywords";
@@ -10,18 +16,58 @@ class Controller_Keyword extends Controller_Template
 
 	}
 
-	public function action_view($id = null)
+	/**
+	 * action_view
+	 * キーワード画面の詳細（閲覧のみ）
+	 * 
+	 * すべての権限で参照可能
+	 * 
+	 * @param string $id
+	 */
+	public function action_view($keyword_id = null)
 	{
-		is_null($id) and Response::redirect('keyword');
+		is_null($keyword_id) and Response::redirect('keyword');
 
-		if ( ! $data['keyword'] = Model_Keyword::find($id))
+		if ( ! $data['keyword'] = Model_Keyword::find($keyword_id))
 		{
-			Session::set_flash('error', 'Could not find keyword #'.$id);
+			Session::set_flash('error', 'キーワードがみつまりませんでした。 番号'.$keyword_id);
+			/*
+			 * @todo
+			 * リダイレクト先は要検討
+			 */
 			Response::redirect('keyword');
 		}
-
-		$this->template->title = "Keyword";
-		$this->template->content = View::forge('keyword/view', $data);
+		
+		/*
+		 * 小項目のキーワードリンクのためデータを取得
+		 * first_category_idで取得できる
+		 * データがない場合は何も表示しない
+		 */
+		//-- 小項目 firstcategory_idを取得
+		$keywordcategory_where['keyword_id'] = $keyword_id;
+		$data['keyword_datas'] = Model_Keywordcategory::get_keywordcategories(
+		        $keywordcategory_where
+		        , 1 /*get_one 1行*/
+		);
+		$keywordcategory_where = null;
+		
+		//-- 小項目ごとのキーワードを取得
+		$keywordcategory_where['firstcategory_id'] = $data['keyword_datas']->firstcategory_id;
+		$data['keywordcategories'] = Model_Keywordcategory::get_keywordcategories(
+		        $keywordcategory_where
+		        , 0 /*get 複数行*/
+		);
+		$keywordcategory_where = null;
+		
+		/*
+		 * タイトルはキーワード
+		 */
+		$this->template->title = $data['keyword']->keyword;
+		
+		/*
+		 * HTMLを表示するために、第3引数はfalse
+		 */
+		$this->template->content = View::forge('keyword/view', $data, false);
 
 	}
 

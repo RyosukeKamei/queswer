@@ -18,10 +18,31 @@
 		<div class="form-group">
 			<?php echo Form::label('コンバートした問題文', 'conveted_question_body', array('class'=>'control-label')); ?>
 
-				<?php echo Form::textarea('conveted_question_body'
-				                          , $questions['conveted_question_body'] // 元の問題文から生成した値は配列
-				                          , array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'コンバートした問題文')); 
+			<?php
+				echo Form::textarea(
+			    	  'conveted_question_body'
+					, $questions['conveted_question_body'] // 元の問題文から生成した値は配列
+				    , array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'コンバートした問題文')); 
                 ?>
+		</div>
+		<div class="form-group">
+			<?php echo Form::label('元の解説', 'question_commentary', array('class'=>'control-label')); ?>
+
+				<?php echo Form::textarea('question_commentary'
+				                          , $before_questions->question_commentary
+				                          , array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'元の解説', "readonly"=>"readonly")); ?>
+
+		</div>
+		<div class="form-group">
+			<?php echo Form::label('コンバートした解説', 'conveted_question_commentary', array('class'=>'control-label')); ?>
+
+			<?php 
+				echo Form::textarea(
+					  'conveted_question_commentary'
+					, $questions['conveted_question_commentary'] // 元の問題文から生成した値は配列
+					, array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'コンバートした解説'));
+            ?>
+
 		</div>
 		<div class="form-group">
 			<?php echo Form::label('コンバートした選択肢ア', 'choice_body_a', array('class'=>'control-label')); ?>
@@ -82,14 +103,6 @@
 				                   );
             ?>	
 		</div>		
-		<div class="form-group">
-			<?php echo Form::label('元の解説', 'question_commentary', array('class'=>'control-label')); ?>
-
-				<?php echo Form::textarea('question_commentary'
-				                          , $before_questions->question_commentary
-				                          , array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'元の解説', "readonly"=>"readonly")); ?>
-
-		</div>
 		<div class="form-group">
 			<?php echo Form::label('小項目ID', 'firstcategory_id', array('class'=>'control-label')); ?>
 

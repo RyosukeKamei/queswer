@@ -8,9 +8,9 @@
 
 		</div>
 		<div class="form-group">
-			<?php echo Form::label('Desctiption', 'desctiption', array('class'=>'control-label')); ?>
+			<?php echo Form::label('Description', 'description', array('class'=>'control-label')); ?>
 
-				<?php echo Form::textarea('desctiption', Input::post('desctiption', isset($keyword) ? $keyword->desctiption : ''), array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'Desctiption')); ?>
+				<?php echo Form::textarea('description', Input::post('description', isset($keyword) ? $keyword->description : ''), array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'Desctiption')); ?>
 
 		</div>
 		<div class="form-group">

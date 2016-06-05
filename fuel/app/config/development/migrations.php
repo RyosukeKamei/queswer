@@ -17,7 +17,7 @@ return array(
         8 => '009_create_firstcategories',
         9 => '010_create_divitions',
         10 => '011_create_keywords',
-        11 => '012_create_keyword_categories',
+        11 => '012_create_keywordcategories',
         12 => '013_create_organizations',
         13 => '014_create_prefixes',
         14 => '015_create_beforequestions',

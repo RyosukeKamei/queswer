@@ -201,21 +201,26 @@ class Controller_Question extends Controller_Template
         is_null($question_number) and Response::redirect('question');
         
         /*
-         * データ取得
+         * データを取得
+         * ・問題１レコード
+         * ・選択肢４レコード
+         * ・小項目の問題（リンク）多レコード
+         * ・中項目のキーワード多レコード
          * 
          * データ1レコードだけどfindを使うためforeachが必要
          * find_byに2つのWHEREを指定できない（？）ため面倒なやり方をしてる
          */ 
-        if ( ! $data['question'] =
-            Model_Question::query()
-            ->related('round')
-            ->related('round.examination')
-            ->related('divition')
-            ->where('question_number', $question_number)
-            ->where('round_id', $round_id)
-            ->get_one()
-        )
+        //-- WHEREを整理
+        $question_wheres['question_number'] = $question_number;
+        $question_wheres['round_id'] = $round_id;
+        //-- データ取得
+        $data['questions'] = Model_Question::get_questions($question_wheres, 1);
+        //-- 変数スコープを明示
+        $question_wheres = null;
+        
+        if ( ! $data['questions'] )
         {
+            
             /*
              * ほとんどありえないエラー（SQLエラー）
              */
@@ -229,35 +234,97 @@ class Controller_Question extends Controller_Template
              * 候補 round/index/3？
              */
              Response::redirect('question');
-        } else {
-            /*
-             * 成功の場合は選択肢を取得
-             */
-            if ( ! $data['choice'] = Model_Choice::find_by('question_id', $data['question']->id))
-            {
-                var_dump($data['question']->id);exit();
-                /*
-                 * ほとんどありえないエラー（SQLエラー）
-                 */
-                Session::set_flash(
-                      'error'
-                    , '選択肢取得（choicesテーブル）に失敗しました。 問題番号 '.$question_number);
-                
-                /*
-                 * @todo
-                 * リダイレクト先は後から考える
-                 * 候補 round/index/3？
-                 */
-                 Response::redirect('question');
-            }
         }
+
+        /*
+         * 問題取得成功
+         * 
+         * 選択肢を取得
+         * 引数が一つだけなら、find_byを使う
+         */
+        if ( ! $data['choices'] = Model_Choice::find_by('question_id', $data['questions']->id))
+        {
+            
+            /*
+             * ほとんどありえないエラー（SQLエラー）
+             */
+            Session::set_flash(
+                  'error'
+                , '選択肢取得（choicesテーブル）に失敗しました。 問題番号 '.$question_number);
+  
+            /*
+             * @todo
+             * リダイレクト先は後から考える
+             * 候補 round/index/3？
+             */
+            Response::redirect('question');
+        }
+        
+        /*
+         * この問題に出てくるキーワード 下記SQLの結果
+         * 問題文（question_keywords）と選択肢（choeice_keywords）
+         * 
+         */
+        $data['question_keywords'] = 
+        	DB::select('keywords.id', 'keywords.keyword', 'keywords.description')
+        	->from('questions')
+        	->join('keywords', 'INNER')->on('questions.question_body', 'LIKE', DB::expr('CONCAT("%", `keywords`.`keyword`, "%")'))
+        	->where('questions.round_id', $round_id)
+        	->where('questions.question_number', $question_number)
+        	->execute();
+        $data['choice_keywords'] = 
+        	DB::select('keywords.id', 'keywords.keyword', 'keywords.description')
+        	->from('choices')
+        	->join('questions', 'INNER')
+        	->on('questions.id', '=', 'choices.question_id')
+        	->join('keywords',  'INNER')
+        	->on('choices.choice_body', 'LIKE', DB::expr('CONCAT("%", `keywords`.`keyword`, "%")'))
+        	->where('questions.round_id', $round_id)
+        	->where('questions.question_number', $question_number)
+        	->execute();
+
+                 
+        /*
+         * WHERE句
+        */
+        //-- 小項目 firstcategory_id
+        if(!empty($question_wheres['firstcategory_id'])) {
+        	$question_obj->where('firstcategory_id', $question_wheres['firstcategory_id']);
+        }
+        
+        
+        /*
+         * 小項目の問題リンクのためデータを取得
+         * データ取得メソッドはモデルにstaticで記載
+         * 引数は
+         */
+        //-- 今回利用する引数はfirstquestion_idのみ
+        $question_wheres['firstcategory_id'] = $data['questions']->firstcategory_id;
+        $data['firstcategories'] = Model_Question::get_questions(
+                                          $question_wheres
+                                        , 0 /*get 複数行*/
+        );
+        $question_wheres = null;
+
+        /*
+         * 中項目のキーワードリンクのためデータを取得
+         * first_category_idで取得できる
+         * データがない場合は何も表示しない
+         */
+        $keywordcategory_where['secondcategory_id'] = $data['questions']->firstcategory->secondcategory_id;
+        $data['keywordcategories'] = Model_Keywordcategory::get_keywordcategories(
+                                          $keywordcategory_where
+                                        , 0 /*get 複数行*/
+        );
+        $keywordcategory_where = null;
+                
         /*
          * タイトルは加工
          */
         $this->template->title = 
-                  $data['question']->round->round_name
-            .' ' .$data['question']->round->examination->examination_name
-            .' 問'.$data['question']->question_number
+                  $data['questions']->round->round_name
+            .' ' .$data['questions']->round->examination->examination_name
+            .' 過去問'.$data['questions']->question_number
             
         ;
         $this->template->content = View::forge('question/commentary', $data, false);
@@ -617,8 +684,28 @@ class Controller_Question extends Controller_Template
         
         /*
          * 問題文(question_body)から選択肢を除去
+         * <ul>(.*)</ul>
+         * 続いて、見出しを除去
+         * <h3>(.*)</h3>
          */
-        $data['questions']['conveted_question_body'] = $this->removed_choice_question_body($before_questions->question_body);
+        $data['questions']['conveted_question_body'] = 
+        		$this->removed_choice_question_body(
+        			$this->removed_choice_question_body(
+        	    		$before_questions->question_body
+        			    , 'ul'
+        			)
+        			, 'h3'
+        		);
+        
+        /*
+         * 解説から不要な文言を除去
+         */
+        $data['questions']['conveted_question_commentary'] =
+			$this->removed_choice_question_body(
+				  $before_questions->question_commentary
+        		, 'h3'
+        );
+        
 
         /*
          * 問題文(question_body)から選択肢を生成
@@ -665,13 +752,13 @@ class Controller_Question extends Controller_Template
              * 問題を追加するINSERT（もしくはUPDATE）を生成
              */
             $question = Model_Question::forge(array(
-                    'question_number'     => Input::post('question_number'),         // 問題番号（固定）
-                    'question_body'       => Input::post('conveted_question_body'),  // 問題本文
-                    'question_commentary' => Input::post('question_commentary'),     // 問題解説（固定）
-                    'firstcategory_id'    => Input::post('firstcategory_id'),        // 小項目（固定）
-                    'divition_id'         => Input::post('divition_id'),             // 問題区分（固定）
-                    'round_id'            => Input::post('round_id'),                // 問題実施（固定）
-                    'prefix_id'           => Input::post('prefix_id'),               // 選択肢の名称（固定）
+                    'question_number'     => Input::post('question_number'),				// 問題番号（固定）
+                    'question_body'       => Input::post('conveted_question_body'),			// 問題本文
+                    'question_commentary' => Input::post('conveted_question_commentary'),	// 問題解説
+                    'firstcategory_id'    => Input::post('firstcategory_id'),				// 小項目（固定）
+                    'divition_id'         => Input::post('divition_id'),					// 問題区分（固定）
+                    'round_id'            => Input::post('round_id'),						// 問題実施（固定）
+                    'prefix_id'           => Input::post('prefix_id'),						// 選択肢の名称（固定）
             ));
         
             if ($question and $question->save())
@@ -779,14 +866,17 @@ class Controller_Question extends Controller_Template
     /**
      * beforequestion.question_bodyから選択肢を除去
      * 
+     * <ul>(.*)</ul>
+     * <h3>(.*)</h3>
+     * 
      * @param string $question_body beforequestionのquestion_body（選択肢除去前）
      * @return string $conveted_question_body 選択肢を除去したquestion_body
      */
-    public static function removed_choice_question_body($question_body) {
+    public static function removed_choice_question_body($question_body, $tag_name) {
         /*
-         * <ul><li></li>...</ul>を除去
+         * 
          */
-        return preg_replace('{<ul>(.*)</ul>}', '', $question_body);
+        return preg_replace('{<'.$tag_name.'>(.*)</'.$tag_name.'>}', '', $question_body);
     }
     
     /**

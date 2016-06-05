@@ -14,7 +14,7 @@
 <?php foreach ($keywords as $item): ?>		<tr>
 
 			<td><?php echo $item->keyword; ?></td>
-			<td><?php echo $item->desctiption; ?></td>
+			<td><?php echo $item->description; ?></td>
 			<td><?php echo $item->deleted_at; ?></td>
 			<td>
 				<div class="btn-toolbar">

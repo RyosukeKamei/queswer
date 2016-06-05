@@ -6,7 +6,7 @@ class Model_Keyword extends Model
 	protected static $_properties = array(
 		'id',
 		'keyword',
-		'desctiption',
+		'description',
 		'deleted_at',
 		'created_at',
 		'updated_at',

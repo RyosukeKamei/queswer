@@ -32,5 +32,9 @@ class Model_Firstcategory extends Model
 
 		return $val;
 	}
-
+	
+	/*
+	 * secondcategoryをJOIN
+	 */
+	protected static $_belongs_to = array('secondcategory');
 }
