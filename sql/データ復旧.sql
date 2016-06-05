@@ -1463,13 +1463,13 @@ VALUES
 /*!40000 ALTER TABLE `keywords` ENABLE KEYS */;
 UNLOCK TABLES;
 
-# テーブルのダンプ keyword_categories
+# テーブルのダンプ keywordcategories
 # ------------------------------------------------------------
 
-LOCK TABLES `keyword_categories` WRITE;
-/*!40000 ALTER TABLE `keyword_categories` DISABLE KEYS */;
+LOCK TABLES `keywordcategories` WRITE;
+/*!40000 ALTER TABLE `keywordcategories` DISABLE KEYS */;
 
-INSERT INTO `keyword_categories` (`id`, `first_category_id`, `keyword_id`)
+INSERT INTO `keywordcategories` (`id`, `first_category_id`, `keyword_id`)
 VALUES
 	(1,42,1),
 	(2,28,2),
@@ -1833,7 +1833,7 @@ VALUES
 	(360,74,338),
 	(361,73,339);
 
-/*!40000 ALTER TABLE `keyword_categories` ENABLE KEYS */;
+/*!40000 ALTER TABLE `keywordcategories` ENABLE KEYS */;
 UNLOCK TABLES;
 
 # テーブルのダンプ beforequestions
@@ -2976,6 +2976,92 @@ VALUES
 
 /*!40000 ALTER TABLE `beforequestions` ENABLE KEYS */;
 UNLOCK TABLES;
+
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+# ************************************************************
+# Sequel Pro SQL dump
+# バージョン 4499
+#
+# http://www.sequelpro.com/
+# https://github.com/sequelpro/sequelpro
+#
+# ホスト: 192.168.99.100 (MySQL 5.7.11)
+# データベース: queswer
+# 作成時刻: 2016-06-05 07:33:01 +0000
+# ************************************************************
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+
+# テーブルのダンプ choices
+# ------------------------------------------------------------
+
+LOCK TABLES `choices` WRITE;
+/*!40000 ALTER TABLE `choices` DISABLE KEYS */;
+
+INSERT INTO `choices` (`id`, `question_id`, `choice_num`, `choice_body`, `correct_flag`, `deleted_at`, `created_at`, `updated_at`)
+VALUES
+	(1,36,1,'(n＋1) AND 255',1,NULL,1465018011,1465018011),
+	(2,36,2,'(n＋1) AND 256',0,NULL,1465018011,1465018011),
+	(3,36,3,'(n＋1) OR 255',0,NULL,1465018011,1465018011),
+	(4,36,4,'(n＋1) OR 256',0,NULL,1465018011,1465018011),
+	(5,37,1,'(A∩B)⊆C',0,NULL,1465097623,1465097623),
+	(6,37,2,'(A∩<span class=\"ol\">B</span>)⊆C',0,NULL,1465097623,1465097623),
+	(7,37,3,'(<span class=\"ol\">A</span>∩B)⊆C',0,NULL,1465097623,1465097623),
+	(8,37,4,'(<span class=\"ol\">A</span>∩<span class=\"ol\">B</span>)⊆C',1,NULL,1465097623,1465097623),
+	(9,38,1,'22.4',0,NULL,1465105388,1465105388),
+	(10,38,2,'36.8',0,NULL,1465105388,1465105388),
+	(11,38,3,'45.2',1,NULL,1465105388,1465105388),
+	(12,38,4,'78.8',0,NULL,1465105388,1465105388),
+	(13,39,1,'1',1,NULL,1465105412,1465105412),
+	(14,39,2,'2',0,NULL,1465105412,1465105412),
+	(15,39,3,'3',0,NULL,1465105412,1465105412),
+	(16,39,4,'4',0,NULL,1465105412,1465105412),
+	(17,40,1,'a と i',0,NULL,1465105426,1465105426),
+	(18,40,2,'b と r',0,NULL,1465105426,1465105426),
+	(19,40,3,'c と l',0,NULL,1465105426,1465105426),
+	(20,40,4,'d と x',1,NULL,1465105426,1465105426),
+	(21,41,1,'',0,NULL,1465105456,1465105456),
+	(22,41,2,'',0,NULL,1465105456,1465105456),
+	(23,41,3,'',1,NULL,1465105456,1465105456),
+	(24,41,4,'',0,NULL,1465105456,1465105456);
+
+/*!40000 ALTER TABLE `choices` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# テーブルのダンプ questions
+# ------------------------------------------------------------
+
+LOCK TABLES `questions` WRITE;
+/*!40000 ALTER TABLE `questions` DISABLE KEYS */;
+
+INSERT INTO `questions` (`id`, `question_number`, `question_body`, `question_commentary`, `firstcategory_id`, `divition_id`, `round_id`, `prefix_id`, `deleted_at`, `created_at`, `updated_at`)
+VALUES
+	(36,1,'<p>0以上255以下の整数nに対して、</p><p>と定義する。next(n)と等しい式はどれか。ここで、x AND y 及び x OR y は、それぞれxとyを2進数表現にして、けたごとの論理積及び論理和をとったものとする。</p>','<p>準備中</p>',1,3,14,1,NULL,1465018011,1465018011),
+	(37,2,'<p>集合A、B、Cに対して<span class=\"ol\">A∪B∪C</span>が空集合であるとき、包含関係として適切なものはどれか。ここで、∪は和集合を、∩は積集合を、<span class=\"ol\">X</span>はXの補集合を、また、X⊆YはXがYの部分集合であることを表す。</p>','<p>準備中</p>',1,3,14,1,NULL,1465097623,1465097623),
+	(38,3,'<p>3台の機械A、B、Cが良品を製造する確率は、それぞれ60%、70%、80%である。機械A、B、Cが製品を一つずつ製造したとき、いずれか二つの製品が良品で残り一つが不良品になる確率は何%か。</p><p></p>','準備中',2,3,14,1,NULL,1465105388,1465105388),
+	(39,4,'<p>図のように16ビットのデータを4×4の正方形状に並べ、行と列にパリティビットを付加することによって何ビットまでの誤りを訂正できるか。ここで、図の網掛け部分はパリティビットを表す。</p>','準備中',4,2,14,1,NULL,1465105412,1465105412),
+	(40,5,'<p>キーが小文字のアルファベット1文字（a, b, …、 z のいずれか）であるデータを、大きさが10のハッシュ表に格納する。ハッシュ関数として、アルファベットのASCIIコードを10進表記法で表したときの1の位の数を用いることにする。衝突が起こるキーの組合せはどれか。ASCIIコードでは、昇順に連続した2進数が、アルファベット順にコードとして割り当てられている。</p>','準備中',6,2,14,1,NULL,1465105426,1465105426),
+	(41,6,'<p>次に示すユークリッド互助法(方法1、方法2)で、正の整数 a、b の最大公約数は、それぞれmとnのどちらの変数に求まるか。ここで、m mod n はmをnで割った余りを表す。</p>','準備中',7,2,14,1,NULL,1465105456,1465105456);
+
+/*!40000 ALTER TABLE `questions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
