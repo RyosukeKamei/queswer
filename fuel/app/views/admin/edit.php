@@ -1,7 +1,6 @@
-<h2>Editing <span class='muted'>Admin</span></h2>
+<h2>管理者更新</h2>
 <br>
 
-<?php echo render('admin/_form'); ?>
-<p>
-	<?php echo Html::anchor('admin/view/'.$admin->id, 'View'); ?> |
-	<?php echo Html::anchor('admin', 'Back'); ?></p>
+<?php echo render('admin/_form_update'); ?>
+
+<p><?php echo Html::anchor('admin', '戻る'); ?></p>

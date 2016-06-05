@@ -1,7 +1,6 @@
-<h2>New <span class='muted'>Admin</span></h2>
+<h2>管理者登録</h2>
 <br>
 
 <?php echo render('admin/_form'); ?>
 
-
-<p><?php echo Html::anchor('admin', 'Back'); ?></p>
+<p><?php echo Html::anchor('admin', '戻る'); ?></p>

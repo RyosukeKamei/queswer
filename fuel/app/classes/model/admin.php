@@ -42,18 +42,17 @@ class Model_Admin extends Model
 		 * 【参考】
 		 * http://raining.bear-life.com/fuelphp/バリデーションのルールを追加する
 		 */
-	    $val = Validation::forge($factory);
+	    $validation = Validation::forge($factory);
 		/*
 		 * 第2引数は「ラベル」なのでエラーメッセージの時に表示するはず…
 		 * 日本語の方が良いかも
 		 * トライアンドエラーしてみて
 		 */
-	    $val->add_field('user_id',        'User Id',        'required|max_length[255]');
-		$val->add_field('password',       'Password',       'required|max_length[255]');
-		$val->add_field('examination_id', 'Examination Id', 'required|valid_string[numeric]');
-// 		$val->add_field('deleted_at',     'Deleted At',     'required|valid_string[numeric]');
+	    $validation->add_field('user_id',        'User Id',        'required|max_length[255]');
+		$validation->add_field('password',       'Password',       'required|max_length[255]');
+		$validation->add_field('examination_id', 'Examination Id', 'required|valid_string[numeric]');
+// 		$validation->add_field('deleted_at',     'Deleted At',     'required|valid_string[numeric]');
 
 		return $val;
 	}
-
 }
