@@ -79,7 +79,7 @@ class Test_Model_Question extends \TestCase
 		$this->assertEquals($error, false);
 		$questions = null;
 		/*
-		 * end of question_numberのWHEREテスト
+		 * end of round_idのWHEREテスト
 		 */
 		
 		/*

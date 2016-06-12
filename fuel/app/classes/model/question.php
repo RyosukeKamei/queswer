@@ -106,7 +106,7 @@ class Model_Question extends Model
 	 */
 	public static function get_question_keywords (
 	          $round_id        /* = 14 */
-	        , $question_number /* = 1*/
+	        , $question_number /* = 1  */
 	) 
 	{
 	    return DB::select(
@@ -117,7 +117,8 @@ class Model_Question extends Model
 	            , 'questions.question_number' /* テスト用 */
 	    )
 	    ->from('questions')
-	    ->join('keywords', 'INNER')->on('questions.question_body', 'LIKE', DB::expr('CONCAT("%", `keywords`.`keyword`, "%")'))
+	    ->join('keywords', 'INNER')
+	    ->on('questions.question_body', 'LIKE', DB::expr('CONCAT("%", `keywords`.`keyword`, "%")'))
 	    ->where('questions.round_id', $round_id)
 	    ->where('questions.question_number', $question_number)
 	    ->execute();

@@ -207,8 +207,6 @@ class Controller_Question extends Controller_Template
          * ・小項目の問題（リンク）多レコード
          * ・中項目のキーワード多レコード
          * 
-         * データ1レコードだけどfindを使うためforeachが必要
-         * find_byに2つのWHEREを指定できない（？）ため面倒なやり方をしてる
          */ 
         //-- WHEREを整理
         $question_wheres['question_number'] = $question_number;
@@ -220,7 +218,6 @@ class Controller_Question extends Controller_Template
         
         if ( ! $data['questions'] )
         {
-            
             /*
              * ほとんどありえないエラー（SQLエラー）
              */
