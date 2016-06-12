@@ -96,4 +96,30 @@ class Model_Question extends Model
 	        return $question_obj->get();
 	    }
 	}
+	
+	/**
+	 * get_question_keywords
+	 * round_idとquestion_idで指定した
+	 * 
+	 * @param int $round_id 例：14 平成27年度応用情報技術者試験
+	 * @param int $question_number 問題の番号
+	 */
+	public static function get_question_keywords (
+	          $round_id        /* = 14 */
+	        , $question_number /* = 1*/
+	) 
+	{
+	    return DB::select(
+	              'keywords.id'
+	            , 'keywords.keyword'
+	            , 'keywords.description'
+	            , 'questions.round_id'        /* テスト用 */
+	            , 'questions.question_number' /* テスト用 */
+	    )
+	    ->from('questions')
+	    ->join('keywords', 'INNER')->on('questions.question_body', 'LIKE', DB::expr('CONCAT("%", `keywords`.`keyword`, "%")'))
+	    ->where('questions.round_id', $round_id)
+	    ->where('questions.question_number', $question_number)
+	    ->execute();
+	}
 }

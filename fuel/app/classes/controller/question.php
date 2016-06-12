@@ -212,7 +212,7 @@ class Controller_Question extends Controller_Template
          */ 
         //-- WHEREを整理
         $question_wheres['question_number'] = $question_number;
-        $question_wheres['round_id'] = $round_id;
+        $question_wheres['round_id']        = $round_id;
         //-- データ取得
         $data['questions'] = Model_Question::get_questions($question_wheres, 1);
         //-- 変数スコープを明示
@@ -244,7 +244,6 @@ class Controller_Question extends Controller_Template
          */
         if ( ! $data['choices'] = Model_Choice::find_by('question_id', $data['questions']->id))
         {
-            
             /*
              * ほとんどありえないエラー（SQLエラー）
              */
@@ -265,33 +264,15 @@ class Controller_Question extends Controller_Template
          * 問題文（question_keywords）と選択肢（choeice_keywords）
          * 
          */
-        $data['question_keywords'] = 
-        	DB::select('keywords.id', 'keywords.keyword', 'keywords.description')
-        	->from('questions')
-        	->join('keywords', 'INNER')->on('questions.question_body', 'LIKE', DB::expr('CONCAT("%", `keywords`.`keyword`, "%")'))
-        	->where('questions.round_id', $round_id)
-        	->where('questions.question_number', $question_number)
-        	->execute();
-        $data['choice_keywords'] = 
-        	DB::select('keywords.id', 'keywords.keyword', 'keywords.description')
-        	->from('choices')
-        	->join('questions', 'INNER')
-        	->on('questions.id', '=', 'choices.question_id')
-        	->join('keywords',  'INNER')
-        	->on('choices.choice_body', 'LIKE', DB::expr('CONCAT("%", `keywords`.`keyword`, "%")'))
-        	->where('questions.round_id', $round_id)
-        	->where('questions.question_number', $question_number)
-        	->execute();
-
-                 
-        /*
-         * WHERE句
-        */
-        //-- 小項目 firstcategory_id
-        if(!empty($question_wheres['firstcategory_id'])) {
-        	$question_obj->where('firstcategory_id', $question_wheres['firstcategory_id']);
-        }
-        
+        $data['question_keywords'] = Model_Question::get_question_keywords(
+                  $round_id         /* = 14 */
+                , $question_number  /* = 1  */
+        );
+        	
+        $data['choice_keywords'] = Model_Choice::get_choice_keywords(
+                  $round_id         /* = 14 */
+                , $question_number  /* = 1  */
+        );
         
         /*
          * 小項目の問題リンクのためデータを取得
