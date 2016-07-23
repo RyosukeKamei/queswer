@@ -1,8 +1,15 @@
 <?php
 use Orm\Model;
 
+/*
+ * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
+ * 8. FROMに当たるテーブル名とモデルを一致させる。
+ */
 class Model_Question extends Model
 {
+	/*
+	 * questionテーブル
+	 */
 	protected static $_properties = array(
 		'id',
 		'question_number',
@@ -105,8 +112,8 @@ class Model_Question extends Model
 	 * @param int $question_number 問題の番号
 	 */
 	public static function get_question_keywords (
-	          $round_id        /* = 14 */
-	        , $question_number /* = 1  */
+	          $round_id        /* = 14 平成27年度応用情報技術者試験 */
+	        , $question_number /* = 1  問題の番号 */
 	) 
 	{
 	    return DB::select(

@@ -29,10 +29,14 @@ class Test_Controller_Question extends TestCase
     }
     
     /**
-     * removed_choice_question_bodyをテスト
-     * beforequestion.question_bodyとquestion.question_bodyを比較して異なればOK（苦しい？）
+     * removed_tag_and_contentsをテスト
+     * beforequestion.question_bodyと
+     * question.question_bodyを比較して異なればOK（苦しい？）
+     * 
+     * ●コーディング規則「優しいコードを書こう」
+     * 1. テストファースト（ユニットテストを先に書く）
      */
-    public function test_removed_choice_question_body() {
+    public function test_removed_tag_and_contents() {
         /*
          * beforequestionから値を取得
          */
@@ -42,11 +46,21 @@ class Test_Controller_Question extends TestCase
          * 選択肢を除去
          */
         $conveted_question_body 
-            = Controller_Question::removed_choice_question_body($questions['question_body'], 'ul');
+            /*
+             * ●コーディング規則「優しいコードを書こう」
+             * 3. 横幅は80文字以内とし、縦の線をまっすぐにする意識をすると、ソースの可読性が向上する
+             */
+            = Controller_Question::removed_tag_and_contents(
+            		  $questions['question_body']
+            		, 'ul'
+            );
         /*
          * 選択肢が除去されていれば、除去前と比較して異なる
          */
-        $this->assertNotEquals($conveted_question_body, $questions['question_body']);
+        $this->assertNotEquals(
+        		  $conveted_question_body
+        		, $questions['question_body']
+        );
     }
     
     /**

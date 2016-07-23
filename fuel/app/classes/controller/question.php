@@ -207,6 +207,9 @@ class Controller_Question extends Controller_Template
          * ・小項目の問題（リンク）多レコード
          * ・中項目のキーワード多レコード
          * 
+         * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
+         * 7. 変数は一度だけ書き込み、無駄な変数は削除する
+         * 
          */ 
         //-- WHEREを整理
         $question_wheres['question_number'] = $question_number;
@@ -238,6 +241,9 @@ class Controller_Question extends Controller_Template
          * 
          * 選択肢を取得
          * 引数が一つだけなら、find_byを使う
+         * 
+         * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
+         * 5. フレームワークの作法に従い、ライブラリを活用することで、コーディング負荷は軽減される
          */
         if ( ! $data['choices'] = Model_Choice::find_by('question_id', $data['questions']->id))
         {
@@ -610,7 +616,7 @@ class Controller_Question extends Controller_Template
      *   beforequestionから値を取得 
      *     コンバートする各値があればOK
      *     
-     * 2. removed_choice_question_body($question_body)
+     * 2. removed_tag_and_contents($question_body)
      *   beforequestion.question_bodyから選択肢を除去
      *     beforequestion.question_bodyとquestion.question_bodyを比較して異なればOK（苦しい？）
      *     
@@ -667,8 +673,8 @@ class Controller_Question extends Controller_Template
          * <h3>(.*)</h3>
          */
         $data['questions']['conveted_question_body'] = 
-        		$this->removed_choice_question_body(
-        			$this->removed_choice_question_body(
+        		$this->removed_tag_and_contents(
+        			$this->removed_tag_and_contents(
         	    		$before_questions->question_body
         			    , 'ul'
         			)
@@ -679,7 +685,7 @@ class Controller_Question extends Controller_Template
          * 解説から不要な文言を除去
          */
         $data['questions']['conveted_question_commentary'] =
-			$this->removed_choice_question_body(
+			$this->removed_tag_and_contents(
 				  $before_questions->question_commentary
         		, 'h3'
         );
@@ -797,6 +803,10 @@ class Controller_Question extends Controller_Template
              * それとプログラム内部の選択肢番号が一致すればそれが正解
              */
             $correct_flag = 0;
+            /*
+             * ●コーディング規則「優しいコードを書こう」
+             * 5. 条件式　左側は調査対象（変化する）右側は比較対象（変化しない）
+             */
             if($choice_num === (int)Input::post('correct_flag'))
             {
                 $correct_flag = 1;
@@ -812,7 +822,12 @@ class Controller_Question extends Controller_Template
                  * 問題を追加するINSERT（もしくはUPDATE）を生成
                  */
                 $choice = Model_Choice::forge(array(
-                    'question_id'  => $question_last_id,                       // 問題番号（固定）
+                    /*
+                     * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
+                     * 4. 省略は誰でもわかる単語だけ（cntなど）、
+                     * よくわからない省略は使わない（BEManagerってなに？BackEndManager）
+                     */
+                	'question_id'  => $question_last_id,                       // 問題番号（固定）
                     'choice_num'   => $choice_num,                             // 選択肢番号
                     'correct_flag' => $correct_flag,                           // 正解
                     'choice_body'  => Input::post('choice_body_'.$choice_num), // 選択肢
@@ -821,11 +836,19 @@ class Controller_Question extends Controller_Template
                 if (!($choice and $choice->save()))
                 {
                     Session::set_flash('error', '選択肢を追加できませんでした。');
+                    /*
+                     * ●コーディング規則「優しいコードを書こう」
+                     * 8. 早めにreturnし、関数から抜ける
+                     */
                     return false;
                 }
             } else
             {
                 Session::set_flash('error', $choice_validation->error());
+                /*
+                 * ●コーディング規則「優しいコードを書こう」
+                 * 8. 早めにreturnし、関数から抜ける
+                 */
                 return false;
             }
         }
@@ -838,23 +861,34 @@ class Controller_Question extends Controller_Template
      * @return array 該当IDのbefore_questionを格納したテーブル
      */
     public static function get_before_question($beforequestion_id) {
-         return Model_Beforequestion::find($beforequestion_id);
+         
+    	return Model_Beforequestion::find($beforequestion_id);
     }
     
     /**
-     * beforequestion.question_bodyから選択肢を除去
+     * タグとタグの中身を除去
+     * removed_tag_and_contents
      * 
+     * ●コーディング規則「優しいコードを書こう」
+     * 4. コメントは「意図を相手に伝えること」なので、簡潔に例となる値やToDo、欠陥を書く
+     * 
+     * 検証済み（下記以外のタグを使う場合はテストを追加すること）
      * <ul>(.*)</ul>
      * <h3>(.*)</h3>
      * 
-     * @param string $question_body beforequestionのquestion_body（選択肢除去前）
-     * @return string $conveted_question_body 選択肢を除去したquestion_body
+     * ●コーディング規則「優しいコードを書こう」
+     * 2. 1関数1機能にすると、コードが短く簡潔になり、テストがしやすくなる
+     * 
+     * @param string $body タグを除去するHTML
+     * @return string タグを除去したHTML
      */
-    public static function removed_choice_question_body($question_body, $tag_name) {
-        /*
-         * 
-         */
-        return preg_replace('{<'.$tag_name.'>(.*)</'.$tag_name.'>}', '', $question_body);
+    public static function removed_tag_and_contents($body, $tag_name) {
+        return 
+        	preg_replace(
+        			  '{<'.$tag_name.'>(.*)</'.$tag_name.'>}'
+        			, ''
+        			, $body
+        	);
     }
     
     /**
@@ -936,6 +970,10 @@ class Controller_Question extends Controller_Template
      * covert_correct
      * beforequestion.question_commentaryから、正解を取得
      * 
+     * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
+     * 1. 変数名・関数名は「短いコメント」と思い、明確で具体的で誤解のない単語を選ぶ（汎用的なtmpなどを使わない）
+     * 例 $question_commentary 問題の解説
+     * 
      * @param string $question_commentary beforequestion.question_commentary
      * @return int $correct_flag 1:ア 2:イ 3:ウ 4:エ
      */
@@ -957,7 +995,12 @@ class Controller_Question extends Controller_Template
         //-- 正解を取得
         preg_match("{<h3>正解：(.*?)</h3>}u", $question_commentary, $temp_correct);
         if($temp_correct[1] === 'ア') {
-            $correct_flag = 1;
+            /*
+             * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
+             * 2. 接頭辞・接尾辞をうまく使い1.を実現する
+             * フラグの場合は"_flag"接尾辞をつける
+             */
+        	$correct_flag = 1;
         } elseif($temp_correct[1] === 'イ') {
             $correct_flag = 2;
         } elseif($temp_correct[1] === 'ウ') {

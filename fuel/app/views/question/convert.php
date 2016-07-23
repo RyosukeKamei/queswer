@@ -28,9 +28,22 @@
 		<div class="form-group">
 			<?php echo Form::label('元の解説', 'question_commentary', array('class'=>'control-label')); ?>
 
-				<?php echo Form::textarea('question_commentary'
+				<?php 
+					echo 
+						/*
+						 * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
+						 * 3. データベースのカラム名・変数名・inputタグのname属性は統一する
+						 */
+						Form::textarea('question_commentary'
 				                          , $before_questions->question_commentary
-				                          , array('class' => 'col-md-8 form-control', 'rows' => 8, 'placeholder'=>'元の解説', "readonly"=>"readonly")); ?>
+				                          , array(
+				                          		  'class' => 'col-md-8 form-control'
+				                          		, 'rows' => 8
+				                          		, 'placeholder'=>'元の解説'
+				                          		, "readonly"=>"readonly"
+				                          )
+						); 
+				?>
 
 		</div>
 		<div class="form-group">

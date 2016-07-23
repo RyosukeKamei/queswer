@@ -1,23 +1,22 @@
 FROM php:5.6-apache
 
-
 ## Update packages
 RUN apt-get update
 
 ## Install depending packages
 RUN apt-get install -y --no-install-recommends \
-wget \
-libmcrypt-dev \
-vim
+	wget \
+	libmcrypt-dev \
+	vim
 
 ## Install FuelPHP's depending extensions
 RUN docker-php-ext-install \
-fileinfo \
-mysqli \
-mbstring \
-mcrypt \
-pdo \
-pdo_mysql 
+	fileinfo \
+	mysqli \
+	mbstring \
+	mcrypt \
+	pdo \
+	pdo_mysql 
 
 ## Cleanup
 RUN rm -rf /var/lib/apt/lists/*
