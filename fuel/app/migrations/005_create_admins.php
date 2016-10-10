@@ -8,9 +8,14 @@ class Create_admins
 	{
 		\DBUtil::create_table('admins', array(
 			'id' => array('constraint' => 11, 'type' => 'int', 'auto_increment' => true, 'unsigned' => true),
-			'user_id' => array('constraint' => 255, 'type' => 'varchar'),
+			'username' => array('constraint' => 50, 'type' => 'varchar', 'unique' => true),
 			'password' => array('constraint' => 255, 'type' => 'varchar'),
 			'examination_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
+			'group' => array('constraint' => 11, 'type' => 'int'),
+			'email' => array('constraint' => 255, 'type' => 'varchar', 'unique' => true),
+			'last_login' => array('constraint' => 25, 'type' => 'varchar'),
+			'login_hash' => array('constraint' => 255, 'type' => 'varchar'),
+			'profile_fields' => array('type' => 'text'),
 			'deleted_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 		    'created_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 			'updated_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),

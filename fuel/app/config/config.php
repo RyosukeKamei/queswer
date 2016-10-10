@@ -272,8 +272,9 @@ return array(
 		 * );
 		 */
 		'packages'  => array(
-            'orm',
-			'auth'
+            'orm'
+			, 'auth'
+		    , 'opauth'
 		),
 
 		/**
@@ -301,6 +302,7 @@ return array(
 		 */
 		'config'  => array(
 		    'auth'
+		    , 'opauth'
 		),
 
 		/**

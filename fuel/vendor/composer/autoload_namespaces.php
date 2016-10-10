@@ -6,10 +6,9 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname(dirname($vendorDir));
 
 return array(
-    'phpDocumentor' => array($vendorDir . '/phpdocumentor/reflection-docblock/src'),
-    'Psr\\Log\\' => array($vendorDir . '/psr/log'),
     'Prophecy\\' => array($vendorDir . '/phpspec/prophecy/src'),
     'Monolog' => array($vendorDir . '/monolog/monolog/src'),
     'Michelf' => array($vendorDir . '/michelf/php-markdown'),
-    'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src'),
+    'Hybrid' => array($vendorDir . '/hybridauth/hybridauth/hybridauth'),
+    '' => array($vendorDir . '/opauth/facebook', $vendorDir . '/opauth/twitter', $vendorDir . '/opauth/google'),
 );
