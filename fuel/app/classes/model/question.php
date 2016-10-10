@@ -38,15 +38,21 @@ class Model_Question extends Model
 	public static function validate($factory)
 	{
 		$val = Validation::forge($factory);
-		if($factory === 'question_create') {
-            $val->add_field('question_number', '問題番号', 'required|valid_string[numeric]');              // 固定値なのであまり関係ない
-           	$val->add_field('conveted_question_body', 'コンバートした問題文', 'required');                              // 問題文は未入力チェックのみ
-            $val->add_field('question_commentary', '解説', 'required');                                   // 固定値なのであまり関係ない
-            $val->add_field('firstcategory_id', 'First Category Id', 'required|valid_string[numeric]'); // 固定値なのであまり関係ない
-            $val->add_field('divition_id', 'Divition Id', 'required|valid_string[numeric]');             // 固定値なのであまり関係ない
-            $val->add_field('round_id', 'Round Id', 'required|valid_string[numeric]');                   // 固定値なのであまり関係ない
-            $val->add_field('prefix_id', 'Prefix Id', 'required|valid_string[numeric]');                 // 固定値なのであまり関係ない
-		}
+// 		if($factory === 'question_create') {
+//             $val->add_field('question_number', '問題番号', 'required|valid_string[numeric]');					// 固定値なのであまり関係ない
+//            	$val->add_field('conveted_question_body', 'コンバートした問題文', 'required');						// 問題文は未入力チェックのみ
+//             $val->add_field('question_commentary', '解説', 'required');										// 固定値なのであまり関係ない
+//             $val->add_field('firstcategory_id', 'First Category Id', 'required|valid_string[numeric]');		// 固定値なのであまり関係ない
+//             $val->add_field('divition_id', 'Divition Id', 'required|valid_string[numeric]');				// 固定値なのであまり関係ない
+//             $val->add_field('round_id', 'Round Id', 'required|valid_string[numeric]');						// 固定値なのであまり関係ない
+// 		} elseif($factory === 'question') {
+			$val->add_field('question_number', '問題番号', 'required|valid_string[numeric]');
+           	$val->add_field('question_body', '問題文', 'required');
+            $val->add_field('question_commentary', '解説', 'required');
+            $val->add_field('firstcategory_id', '小項目', 'required|valid_string[numeric]');
+            $val->add_field('divition_id', '問題種別', 'required|valid_string[numeric]');
+            $val->add_field('round_id', '問題実施', 'required|valid_string[numeric]');
+// 		}
 		return $val;
 	}
 

@@ -1,4 +1,13 @@
 <?php
+/**
+ * Controller_Keyword
+ * キーワード
+ * 
+ * 
+ * 
+ * @author sr2smail
+ *
+ */
 class Controller_Keyword extends Controller_Template
 {
 

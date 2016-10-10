@@ -1,4 +1,15 @@
 <?php
+/**
+ * Controller_Firstcategories
+ * 小項目（離散数学など）
+ * 今のところ増減する予定なし、あったとしても頻度は限りなく小さい
+ * 当面はDB直接操作で運用
+ * ↓
+ * コメントアウト
+ * 
+ * @author sr2smail
+ *
+ */
 class Controller_Firstcategories extends Controller_Template
 {
 

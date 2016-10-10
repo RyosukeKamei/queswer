@@ -9,6 +9,8 @@ return array(
     'File_Iterator' => $vendorDir . '/phpunit/php-file-iterator/src/Iterator.php',
     'File_Iterator_Facade' => $vendorDir . '/phpunit/php-file-iterator/src/Facade.php',
     'File_Iterator_Factory' => $vendorDir . '/phpunit/php-file-iterator/src/Factory.php',
+    'Opauth' => $vendorDir . '/opauth/opauth/lib/Opauth/Opauth.php',
+    'OpauthStrategy' => $vendorDir . '/opauth/opauth/lib/Opauth/OpauthStrategy.php',
     'PHPUnit_Exception' => $vendorDir . '/phpunit/phpunit/src/Exception.php',
     'PHPUnit_Extensions_Database_AbstractTester' => $vendorDir . '/phpunit/dbunit/src/Extensions/Database/AbstractTester.php',
     'PHPUnit_Extensions_Database_Constraint_DataSetIsEqual' => $vendorDir . '/phpunit/dbunit/src/Extensions/Database/Constraint/DataSetIsEqual.php',

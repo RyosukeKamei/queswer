@@ -1,4 +1,15 @@
 <?php
+/**
+ * Controller_Secondcategories
+ * 中項目（基礎理論・アルゴリズムとプログラミングなど）
+ * 今のところ増減する予定なし、あったとしても頻度は限りなく小さい
+ * 当面はDB直接操作で運用
+ * ↓
+ * コメントアウト
+ * 
+ * @author sr2smail
+ *
+ */
 class Controller_Secondcategories extends Controller_Template
 {
 

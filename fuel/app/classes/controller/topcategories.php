@@ -1,4 +1,15 @@
 <?php
+/**
+ * Controller_Topcategories
+ * カテゴリ（テクノロジ・マネジメント・ストラテジなど）
+ * 今のところ増減する予定なし、あったとしても頻度は限りなく小さい
+ * 当面はDB直接操作で運用
+ * ↓
+ * コメントアウト
+ * 
+ * @author sr2smail
+ *
+ */
 class Controller_Topcategories extends Controller_Template
 {
 

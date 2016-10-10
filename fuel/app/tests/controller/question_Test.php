@@ -3,7 +3,7 @@ use Fuel\Core\Controller;
 /**
  * questionテスト
  * 
- *
+ * @group Question
  * @group App
  */
 class Test_Controller_Question extends TestCase
@@ -88,4 +88,135 @@ class Test_Controller_Question extends TestCase
         $this->assertGreaterThanOrEqual(0, /* ≦ */ $correct_flag);
         $this->assertLessThanOrEqual   (4, /* ≧ */ $correct_flag);  
     }
+    
+    public function test_create_question() {
+    	/*
+    	 * サンプルで登録する値
+    	 * POSTで取得する想定
+    	 */
+        $posts['question_number']     = 1;
+		$posts['question_body']       = '問題本文テスト';
+		$posts['question_commentary'] = '問題解説';
+        $posts['firstcategory_id']    = 1;				// 小項目
+        $posts['divition_id']         = 1;				// 問題区分
+        $posts['round_id']            = 1;				// 問題実施
+        $posts['prefix_id']           = 1;				// 固定
+        $posts['choice_body_1']       = '選択肢ア';
+        $posts['choice_body_2']       = '選択肢イ';
+        $posts['choice_body_3']       = '選択肢ウ';
+        $posts['choice_body_4']       = '選択肢エ';
+        $posts['choice_body_4']       = '選択肢エ';
+        $posts['correct_flag']        = 1;				// 正解はア
+        
+        /*
+         * テスト実行
+         * 成功すると、$question_last_id（その時登録したquestion_id）を取得
+         */
+        $question_last_id = Controller_Question::create_question($posts, true);
+        
+        /*
+         * $question_last_id（その時登録したquestion_id）が1以上なら、登録成功
+         */
+        $this->assertGreaterThanOrEqual(1, /* ≦ */ $question_last_id);
+
+        /*
+         * 変更対象
+         */
+        $question = Model_Question::find($question_last_id);
+        $choices  = Model_Choice::find('all', array('where' => array(array('question_id', $question_last_id),)));
+        
+        /*
+         * サンプルで登録する値
+         * POSTで取得する想定
+        */
+        $posts['question_number']     = 2;
+        $posts['question_body']       = '変更テスト';
+        $posts['question_commentary'] = '変更解説';
+        $posts['firstcategory_id']    = 2;				// 小項目
+        $posts['divition_id']         = 2;				// 問題区分
+        $posts['round_id']            = 2;				// 問題実施
+        $posts['prefix_id']           = 1;				// 固定
+        $posts['choice_body_1']       = '選択肢ア変更';
+        $posts['choice_body_2']       = '選択肢イ変更';
+        $posts['choice_body_3']       = '選択肢ウ変更';
+        $posts['choice_body_4']       = '選択肢エ変更';
+        $posts['correct_flag']        = 3;				// 正解はウ
+        
+        /*
+         * テスト
+         */
+        $this->assertTrue(Controller_Question::edit_question($question_last_id, $question, $posts, true));
+        $this->assertTrue(Controller_Question::edit_choices($question_last_id,  $choices,  $posts));        
+        
+        /*
+         * 後始末
+         * テストで追加したデータを削除
+         * questionを削除すると、choicesも削除
+         */
+        $this->assertEquals(1, DB::delete('questions')->where('id', $question_last_id)->execute());
+    }
+    
+//     public function test_edit_question() {
+//     	/*
+//     	 * サンプルで登録する値
+//     	 * POSTで取得する想定
+//     	 */
+//         $posts['question_number']     = 1;
+// 		$posts['question_body']       = '問題本文テスト';
+// 		$posts['question_commentary'] = '問題解説';
+//         $posts['firstcategory_id']    = 1;				// 小項目
+//         $posts['divition_id']         = 1;				// 問題区分
+//         $posts['round_id']            = 1;				// 問題実施
+//         $posts['prefix_id']           = 1;				// 固定
+//         $posts['choice_body_1']       = '選択肢ア';
+//         $posts['choice_body_2']       = '選択肢イ';
+//         $posts['choice_body_3']       = '選択肢ウ';
+//         $posts['choice_body_4']       = '選択肢エ';
+//         $posts['correct_flag']        = 1;				// 正解はア
+        
+//         /*
+//          * テスト実行
+//          * 成功すると、$question_last_id（その時登録したquestion_id）を取得
+//          */
+//         $question_last_id = Controller_Question::create_question($posts, true);
+        
+//     	/*
+//     	 * 変更対象
+//     	 */
+//     	$question = Model_Question::find($question_last_id);
+//     	$choices  = Model_Choice::find('all', array('where' => array(array('question_id', $question_last_id),)));
+        
+//     	/*
+//     	 * サンプルで登録する値
+//     	 * POSTで取得する想定
+//     	 */
+//     	$posts['question_number']     = 2;
+//     	$posts['question_body']       = '変更テスト';
+//     	$posts['question_commentary'] = '変更解説';
+//     	$posts['firstcategory_id']    = 2;				// 小項目
+//     	$posts['divition_id']         = 2;				// 問題区分
+//     	$posts['round_id']            = 2;				// 問題実施
+//     	$posts['prefix_id']           = 1;				// 固定
+//     	$posts['choice_body_1']       = '選択肢ア変更';
+//     	$posts['choice_body_2']       = '選択肢イ変更';
+//     	$posts['choice_body_3']       = '選択肢ウ変更';
+//     	$posts['choice_body_4']       = '選択肢エ変更';
+//     	$posts['correct_flag']        = 3;				// 正解はウ
+
+//     	/*
+//     	 * テスト
+//     	 */
+//     	$this->assertTrue(Controller_Question::edit_question($question_id, $question, $posts, true));
+//     	$this->assertTrue(Controller_Question::edit_choices($question_id,  $choices,  $posts));
+    	    	
+//     	/*
+//     	 * 後始末
+//     	 * テストで追加したデータを削除
+//     	 * questionを削除すると、choicesも削除
+//     	 */
+//     	$this->assertEquals(1, DB::delete('questions')->where('id', $question_last_id)->execute());
+    	
+    	 
+    	 
+//     }
 }

@@ -1,4 +1,15 @@
 <?php
+/**
+ * Controller_Thirdcategories
+ * 大項目（基礎理論・コンピュータシステムなど）
+ * 今のところ増減する予定なし、あったとしても頻度は限りなく小さい
+ * 当面はDB直接操作で運用
+ * ↓
+ * コメントアウト
+ * 
+ * @author sr2smail
+ *
+ */
 class Controller_Thirdcategories extends Controller_Template
 {
 

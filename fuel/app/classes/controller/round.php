@@ -3,7 +3,7 @@ class Controller_Round extends Controller_Template
 {
     /**
      * action_list
-     * テストの一覧表示
+     * 試験一覧表示
      * 
      */
 	public function action_list($examnation_id = null)
@@ -40,29 +40,36 @@ class Controller_Round extends Controller_Template
     
     /*
 	 * 以下はscaffoldされた自動生成ファイル
+	 * 使わない
+	 * action_index
+	 * action_view
+	 * 登録・更新・削除は後日使うかも
+	 * action_create
+	 * action_exit
+	 * action_delete
 	 */
-	public function action_index()
-	{
-		$data['rounds'] = Model_Round::find('all');
-		$this->template->title = "Rounds";
-		$this->template->content = View::forge('round/index', $data);
+// 	public function action_index()
+// 	{
+// 		$data['rounds'] = Model_Round::find('all');
+// 		$this->template->title = "Rounds";
+// 		$this->template->content = View::forge('round/index', $data);
 
-	}
+// 	}
 
-	public function action_view($id = null)
-	{
-		is_null($id) and Response::redirect('round');
+// 	public function action_view($id = null)
+// 	{
+// 		is_null($id) and Response::redirect('round');
 
-		if ( ! $data['round'] = Model_Round::find($id))
-		{
-			Session::set_flash('error', 'Could not find round #'.$id);
-			Response::redirect('round');
-		}
+// 		if ( ! $data['round'] = Model_Round::find($id))
+// 		{
+// 			Session::set_flash('error', 'Could not find round #'.$id);
+// 			Response::redirect('round');
+// 		}
 
-		$this->template->title = "Round";
-		$this->template->content = View::forge('round/view', $data);
+// 		$this->template->title = "Round";
+// 		$this->template->content = View::forge('round/view', $data);
 
-	}
+// 	}
 
 	public function action_create()
 	{

@@ -10,8 +10,13 @@ class Controller_Question extends Controller_Template
      */
     public function action_index()
     {
-        $data['questions'] = Model_Question::find('all');
-        $this->template->title = "Questions";
+    	$data['questions'] = 
+            Model_Question::query()
+            ->related('round')
+            ->related('divition')
+            ->related('firstcategory')
+            ->get();
+        $this->template->title = "問題一覧";
         $this->template->content = View::forge('question/index', $data);
 
     }
@@ -24,58 +29,49 @@ class Controller_Question extends Controller_Template
      * 
      * @param int $id 問題ID
      */
-    public function action_view($id = null)
-    {
-        is_null($id) and Response::redirect('question');
+//     public function action_view($id = null)
+//     {
+//         is_null($id) and Response::redirect('question');
 
-        if ( ! $data['question'] = Model_Question::find($id))
-        {
-            Session::set_flash('error', 'Could not find question #'.$id);
-            Response::redirect('question');
-        }
+//         if ( ! $data['question'] = Model_Question::find($id))
+//         {
+//             Session::set_flash('error', 'Could not find question #'.$id);
+//             Response::redirect('question');
+//         }
 
-        $this->template->title = "Question";
-        $this->template->content = View::forge('question/view', $data);
+//         $this->template->title = "Question";
+//         $this->template->content = View::forge('question/view', $data);
 
-    }
+//     }
 
     /**
      * action_create
      * 問題生成
-     * 
-     * @TODO
-     * 選択肢（choeice）も一緒にINSERTするように改造
+     * 選択肢も同時に登録
      */
     public function action_create()
     {
-        if (Input::method() == 'POST')
+    	if (Input::method() == 'POST')
         {
             $val = Model_Question::validate('create');
 
             if ($val->run())
             {
-                $question = Model_Question::forge(array(
-                    'question_number' => Input::post('question_number'),
-                    'question_title' => Input::post('question_title'),
-                    'question_body' => Input::post('question_body'),
-                    'question_commentary' => Input::post('question_commentary'),
-                    'first_category_id' => Input::post('first_category_id'),
-                    'divition_id' => Input::post('divition_id'),
-                    'round_id' => Input::post('round_id'),
-                    'prefix_id' => Input::post('prefix_id'),
-                    'deleted_at' => Input::post('deleted_at'),
-                ));
-
-                if ($question and $question->save())
+                /*
+                 * POSTを変換
+                 * テストするため
+                 */
+            	$posts = Input::post();
+                if ($posts && $this->create_question($posts))
                 {
-                    Session::set_flash('success', 'Added question #'.$question->id.'.');
+                	Session::set_flash('問題の登録に成功しました。');
 
-                    Response::redirect('question');
+                    Response::redirect('question/create');
                 }
 
                 else
                 {
-                    Session::set_flash('error', 'Could not save question.');
+                    Session::set_flash('error', '問題の登録に失敗しました。');
                 }
             }
             else
@@ -84,7 +80,7 @@ class Controller_Question extends Controller_Template
             }
         }
 
-        $this->template->title = "Questions";
+        $this->template->title = "問題登録";
         $this->template->content = View::forge('question/create');
 
     }
@@ -92,9 +88,7 @@ class Controller_Question extends Controller_Template
     /**
      * action_edit
      * 問題編集
-     * 
-     * @TODO
-     * 選択肢（choeice）も一緒にUPDATEするように改造
+     * 選択肢（choice）も同時に更新
      * 
      * @param int $id 問題ID
      */
@@ -102,60 +96,81 @@ class Controller_Question extends Controller_Template
     {
         is_null($id) and Response::redirect('question');
 
+        /*
+         * $question = Model_Question::find($id)
+         * これをすることで、saveメソッドで自動的にupdateする
+         */
+        //-- 問題文
         if ( ! $question = Model_Question::find($id))
         {
-            Session::set_flash('error', 'Could not find question #'.$id);
-            Response::redirect('question');
+            {
+	        	Session::set_flash('error', '問題が見つかりません。 #'.$id);
+    	        Response::redirect('question');
+            }
         }
-
-        $val = Model_Question::validate('edit');
-
-        if ($val->run())
+        //-- 選択肢
+        if( ! $choices =
+        		Model_Choice::find('all'
+        				, array(
+        						'where' => array(
+        								array('question_id', $id),
+        						)
+        				)
+        		)
+        )
         {
-            $question->question_number = Input::post('question_number');
-            $question->question_title = Input::post('question_title');
-            $question->question_body = Input::post('question_body');
-            $question->question_commentary = Input::post('question_commentary');
-            $question->first_category_id = Input::post('first_category_id');
-            $question->divition_id = Input::post('divition_id');
-            $question->round_id = Input::post('round_id');
-            $question->prefix_id = Input::post('prefix_id');
-            $question->deleted_at = Input::post('deleted_at');
-
-            if ($question->save())
-            {
-                Session::set_flash('success', 'Updated question #' . $id);
-
-                Response::redirect('question');
-            }
-
-            else
-            {
-                Session::set_flash('error', 'Could not update question #' . $id);
-            }
+        	Session::set_flash('error', '選択肢が見つかりません。 #'.$id);
+        	Response::redirect('question');
+        }        
+        
+        /*
+         * edit_questionでバリデーションエラーの場合
+         * エラーコードを取得
+         */
+        if($this->edit_question($id, $question, Input::post())) {
+        	/*
+        	 * 選択肢登録で成功しても失敗しても元の画面にリダイレクト
+        	 */
+        	if($this->edit_choices($id, $choices, Input::post())) {
+        		Session::set_flash('問題の登録に成功しました。');
+        	}
+        	Response::redirect('question/edit/'.$id);
         }
-
         else
         {
             if (Input::method() == 'POST')
             {
-                $question->question_number = $val->validated('question_number');
-                $question->question_title = $val->validated('question_title');
-                $question->question_body = $val->validated('question_body');
+                $question->question_number     = $val->validated('question_number');
+                $question->question_body       = $val->validated('question_body');
                 $question->question_commentary = $val->validated('question_commentary');
-                $question->first_category_id = $val->validated('first_category_id');
-                $question->divition_id = $val->validated('divition_id');
-                $question->round_id = $val->validated('round_id');
-                $question->prefix_id = $val->validated('prefix_id');
-                $question->deleted_at = $val->validated('deleted_at');
+                $question->firstcategory_id    = $val->validated('firstcategory_id');
+                $question->divition_id         = $val->validated('divition_id');
+                $question->round_id            = $val->validated('round_id');
 
                 Session::set_flash('error', $val->error());
             }
 
+            /*
+             * 選択肢を整形
+             */
+            $choice_array = array();
+            $choice_num = 1;
+            foreach($choices AS $item) {
+            	$choice_array[$choice_num] = $item->choice_body;
+            	/*
+            	 * 正解のデフォルト
+            	 */
+            	if((int)$item->correct_flag === 1) {
+            		$choice_array['correct_flag'] = $choice_num;
+            	}
+            	$choice_num++;
+            }
+            
             $this->template->set_global('question', $question, false);
+            $this->template->set_global('choices',   $choice_array,   false);
         }
 
-        $this->template->title = "Questions";
+        $this->template->title = "問題更新";
         $this->template->content = View::forge('question/edit');
 
     }
@@ -175,20 +190,30 @@ class Controller_Question extends Controller_Template
 
         if ($question = Model_Question::find($id))
         {
-            $question->delete();
 
-            Session::set_flash('success', 'Deleted question #'.$id);
+//             $question->delete();
+			// カスケードした外部参照ごと削除するにはこちら
+        	DB::delete('questions')->where('id', $id)->execute();
+
+            Session::set_flash('success', '削除しました。 #'.$id);
         }
 
         else
         {
-            Session::set_flash('error', 'Could not delete question #'.$id);
+            Session::set_flash('error', '削除できませんでした。 #'.$id);
         }
 
         Response::redirect('question');
 
     }
     
+    /**
+     * action_commentary
+     * 問題の解説を表示
+     * 
+     * @param string $question_number
+     * @param string $round_id
+     */
     public function action_commentary($question_number = null, $round_id = null)
     {
         /*
@@ -639,17 +664,29 @@ class Controller_Question extends Controller_Template
          * Viewに渡すデータ
          */
         $data = array();
+
+        /*
+         * 
+         */
         
         /*
          * POSTに値がある場合はコンバート実行
+         * POSTに問題がない場合は、コンバートした問題文と選択肢を取得する
          */
         if (Input::method() == 'POST')
         {
             /*
              * QuestionとChoiceのINSERTを実行
              */
-            $this->create_question($beforequestion_id);
-         }
+            if($this->create_question()) {
+				/*
+				 * INSERTが成功したら
+				 * 次の$beforequestion_idにリダイレクト
+				 */
+				$to_redirect = '/question/convert/'.++$beforequestion_id;
+				Response::redirect($to_redirect);
+            }
+        }
 
         /*
          * コンバートした問題文と選択肢を取得
@@ -715,38 +752,60 @@ class Controller_Question extends Controller_Template
      * INSERT文作成部分を切り出し
      * 可読性向上のための完全にprivateなのでテスト不要？
      * 
-     * @param int $beforequestion_id beforequestionのID
+     * @param $posts POSTの配列
+     * @param $testmode true/false
+     * @return $question_last_id 問題ID（テストで削除するため）
      */
-    private function create_question($beforequestion_id) {
+    public static function create_question($posts, $testmode = false) {
+        /*
+         * 成功する場合はquestion_idを返す
+         */
+    	$question_last_id = 0;
+  	
         /*
          * $pdoを取得
          * トランザクションとQuesitonをINSERTした後のidを取得
          */
         Database_Connection::instance()->connect();
         $pdo = Database_Connection::instance()->connection();
-        $pdo->beginTransaction();
-        
+        $pdo->beginTransaction();        
         /*
          * Questionのバリデーション
          */
-        $question_validation = Model_Question::validate('question_create');
-        if ($question_validation->run())
+        $question_validation = Model_Question::validate('question');
+        if ($testmode || $question_validation->run())
         {
+			/*
+			 * ユニットテスト（$testmode = true）はバリデーションを無視
+			 * 
+			 */
             /*
              * 問題を追加するINSERT（もしくはUPDATE）を生成
              */
+        	$question_body = null;
+        	if(isset($posts['conveted_question_body'])) {
+        		$question_body = $posts['conveted_question_body'];
+        	} elseif(isset($posts['question_body'])) {
+        		$question_body = $posts['question_body'];
+        	}
+        	if(isset($posts['conveted_question_commentary'])) {
+        		$question_commentary = $posts['conveted_question_commentary'];
+        	} elseif(isset($posts['question_commentary'])) {
+        		$question_commentary = $posts['question_commentary'];
+        	}
             $question = Model_Question::forge(array(
-                    'question_number'     => Input::post('question_number'),				// 問題番号（固定）
-                    'question_body'       => Input::post('conveted_question_body'),			// 問題本文
-                    'question_commentary' => Input::post('conveted_question_commentary'),	// 問題解説
-                    'firstcategory_id'    => Input::post('firstcategory_id'),				// 小項目（固定）
-                    'divition_id'         => Input::post('divition_id'),					// 問題区分（固定）
-                    'round_id'            => Input::post('round_id'),						// 問題実施（固定）
-                    'prefix_id'           => Input::post('prefix_id'),						// 選択肢の名称（固定）
+                    'question_number'     => $posts['question_number'],					// 問題番号
+                    'question_body'       => $question_body,							// 問題本文
+                    'question_commentary' => $question_commentary,						// 問題解説
+                    'firstcategory_id'    => $posts['firstcategory_id'],				// 小項目（固定）
+                    'divition_id'         => $posts['divition_id'],						// 問題区分（固定）
+                    'round_id'            => $posts['round_id'],						// 問題実施（固定）
+                    'prefix_id'           => 1,						// 固定
             ));
-        
+
             if ($question and $question->save())
             {
+
                 /*
                  * questionをINSERTした時のIDを取得
                  * choiceとの関連付け
@@ -755,20 +814,20 @@ class Controller_Question extends Controller_Template
                 
                 /*
                  * 選択肢(choice)を作成
+                 * 第1引数 問題のID
+                 * 第2引数 POSTの値
+                 * 第3引数 テストモードの場合はtrue
                  */
-                $success = $this->create_choices($question_last_id);
+                $success = Controller_Question::create_choices($question_last_id, $posts, $testmode);
                 
                 /*
                  * エラーがない場合は成功メッセージをセットして、次の問題のコンバートに移動
                  */
                 if($success) {
-                    Session::set_flash('success', '問題を追加しました！ #'.$question->id.'.');
+                    Session::set_flash('success', '問題を追加しました！');
                     $pdo->commit();
-                    /*
-                     * 次のIDにリダイレクト
-                     */
-                    $to_redirect = '/question/convert/'.++$beforequestion_id;
-                    Response::redirect($to_redirect);
+                    return $question_last_id;
+
                 }
             } else
             {
@@ -781,7 +840,8 @@ class Controller_Question extends Controller_Template
         /*
          * エラーがある場合、ここを通過するのでロールバック
          */
-        $pdo->rollBack();        
+        $pdo->rollBack();
+        return $question_last_id;
     }
     
     /**
@@ -789,9 +849,11 @@ class Controller_Question extends Controller_Template
      * 選択肢（4つ）を生成
      * 
      * @param int $question_last_id question.id
+     * @param array $posts 
+     * @param boolean $testmode
      * @return boolean
      */
-    private function create_choices($question_last_id) {
+    public static function create_choices($question_last_id, $posts, $testmode = false) {
         /*
          * IPA系の試験は選択肢は4つある
          */
@@ -807,7 +869,7 @@ class Controller_Question extends Controller_Template
              * ●コーディング規則「優しいコードを書こう」
              * 5. 条件式　左側は調査対象（変化する）右側は比較対象（変化しない）
              */
-            if($choice_num === (int)Input::post('correct_flag'))
+            if($choice_num === (int)$posts['correct_flag'])
             {
                 $correct_flag = 1;
             }
@@ -816,8 +878,11 @@ class Controller_Question extends Controller_Template
              * Choiceのバリデーション
              */
             $choice_validation = Model_Choice::validate('convert', $choice_num);
-            if ($choice_validation->run())
+            if ($testmode || $choice_validation->run())
             {
+                /*
+                 * ユニットテストの場合はバリデーションを通さない
+                 */
                 /*
                  * 問題を追加するINSERT（もしくはUPDATE）を生成
                  */
@@ -827,10 +892,10 @@ class Controller_Question extends Controller_Template
                      * 4. 省略は誰でもわかる単語だけ（cntなど）、
                      * よくわからない省略は使わない（BEManagerってなに？BackEndManager）
                      */
-                	'question_id'  => $question_last_id,                       // 問題番号（固定）
-                    'choice_num'   => $choice_num,                             // 選択肢番号
-                    'correct_flag' => $correct_flag,                           // 正解
-                    'choice_body'  => Input::post('choice_body_'.$choice_num), // 選択肢
+                	'question_id'  => $question_last_id,					// 問題番号（固定）
+                    'choice_num'   => $choice_num,							// 選択肢番号
+                    'correct_flag' => $correct_flag,						// 正解
+                    'choice_body'  => $posts['choice_body_'.$choice_num],	// 選択肢
                 ));
         
                 if (!($choice and $choice->save()))
@@ -853,6 +918,75 @@ class Controller_Question extends Controller_Template
             }
         }
         return true;    
+    }
+    
+    public static function edit_question($question_id, $question, $posts, $testmode = false) {
+    	/*
+    	 * 登録が成功するとtrueを返す
+    	 * 登録が失敗するとリダイレクトする
+    	 * バリデーションチェックに引っかかったらfalseを返す
+    	 */
+    	$val = Model_Question::validate('edit');
+    	
+    	if ($testmode || $val->run())
+    	{
+    		$question->question_number     = $posts['question_number'];
+    		$question->question_body       = $posts['question_body'];
+    		$question->question_commentary = $posts['question_commentary'];
+    		$question->firstcategory_id    = $posts['firstcategory_id'];
+    		$question->divition_id         = $posts['divition_id'];
+    		$question->round_id            = $posts['round_id'];
+    	
+    		if ($question->save())
+    		{
+				return true;
+    		}
+    		else
+    		{
+    			Session::set_flash('error', '問題を更新できませんでした。 #' . $question_id);
+    			Response::redirect('question/edit/'.$question_id);
+    		}
+    	}
+    	return false;
+    }
+    
+    public static function edit_choices($question_id, $choices, $posts) {
+    	$choice_count = 1;
+    	foreach($choices AS $item) {
+    		/*
+    		 * 選択肢があるか
+    		 */
+    		if ( ! $choice = Model_Choice::find($item->id))
+    		{
+    			Session::set_flash('error', '選択肢が見つかりません。 #'.$item->id);
+    			return false;
+    		}
+    		else
+    		{
+    			$choice->choice_body     = $posts['choice_body_'.$choice_count];
+    			/*
+    			 * 正解
+    			*/
+    			if((int)$posts['correct_flag'] === $choice_count) {
+    				/*
+    				 * 正解の選択肢の場合は1
+    				 */
+    				$choice->correct_flag = 1;
+    			} else {
+    				/*
+    				 * 不正解な場合は0
+    				 */
+    				$choice->correct_flag = 0;
+    			}
+    			if(!$choice->save())
+    			{
+    				Session::set_flash('error', '選択肢を更新できませんでした。 #' . $question_id);
+    				return false;
+    			}
+    		}
+    		$choice_count++;
+    	}
+    	return true;  	
     }
     
     /**

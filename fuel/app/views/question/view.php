@@ -4,9 +4,6 @@
 	<strong>Question number:</strong>
 	<?php echo $question->question_number; ?></p>
 <p>
-	<strong>Question title:</strong>
-	<?php echo $question->question_title; ?></p>
-<p>
 	<strong>Question body:</strong>
 	<?php echo $question->question_body; ?></p>
 <p>
@@ -14,7 +11,7 @@
 	<?php echo $question->question_commentary; ?></p>
 <p>
 	<strong>First category id:</strong>
-	<?php echo $question->first_category_id; ?></p>
+	<?php echo $question->firstcategory_id; ?></p>
 <p>
 	<strong>Divition id:</strong>
 	<?php echo $question->divition_id; ?></p>
