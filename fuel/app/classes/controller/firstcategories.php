@@ -12,6 +12,17 @@
  */
 class Controller_Firstcategories extends Controller_Template
 {
+	
+	public function before()
+	{
+		parent::before();
+		$is_admin = Session::get('is_admin');
+	
+		//ログイン画面にリダイレクト
+		if (!$is_admin) {
+			Response::redirect('admin/login');
+		}
+	}
 
 	public function action_index()
 	{

@@ -306,6 +306,9 @@ class Controller_Admin extends Controller_Template
 			$this->is_admin = true;
 		}
 		
+		//管理者フラグをセッション変数にセットする
+		Session::set('is_admin', $this->is_admin);
+		
 		//is_adminプロパティをビューに受け渡す
 		View::set_global('is_admin', $this->is_admin);
 	}
@@ -318,7 +321,7 @@ class Controller_Admin extends Controller_Template
 	public function action_login()
 	{
 		//既にログイン済みであれば会員トップページにリダイレクト
-        Auth::check() and Response::redirect('round/index/3');
+        Auth::check() and Response::redirect('keyword/index');
         
         //usernameとpasswordがPOSTされている場合は認証を試みる
         if (Input::post('username') and Input::post('password'))
@@ -330,7 +333,10 @@ class Controller_Admin extends Controller_Template
 	        //認証に成功したら会員トップページにリダイレクト
 	        if ($auth->login($username, $password))
 	        {
-	            Response::redirect('round/index/3');
+	        	//管理者フラグをセッション変数にセットする
+	        	Session::set('is_admin', true);
+	        	//リダイレクト
+	            Response::redirect('keyword/index');
 	        }
 	            
 	        Session::set_flash('error', 'ユーザー名とパスワードが一致しません。');
@@ -351,8 +357,11 @@ class Controller_Admin extends Controller_Template
 		//ログアウト
 		$auth = Auth::instance();
 		$auth->logout();
+		
+		//管理者フラグのセッション変数を削除する
+		Session::delete('is_admin');
 	
-		//'member'にリダイレクト
+		//ログイン画面にリダイレクト
 		Response::redirect('admin/login');
 	}
 }

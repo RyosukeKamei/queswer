@@ -10,6 +10,17 @@
  */
 class Controller_Keyword extends Controller_Template
 {
+	
+	public function before()
+	{
+		parent::before();
+		$is_admin = Session::get('is_admin');
+	
+		//ログイン画面にリダイレクト
+		if (!$is_admin) {
+			Response::redirect('admin/login');
+		}
+	}
 
 	/**
 	 * action_index
