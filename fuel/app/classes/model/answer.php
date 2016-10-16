@@ -36,5 +36,46 @@ class Model_Answer extends Model
 
 		return $val;
 	}
-
+	
+	/**
+	 * get_answers
+	 * 解答ヘッダを取得
+	 * 
+	 * @param int $round_id 実施回
+	 * @param int $user_id  ユーザID
+	 * @return Ambigous <\Orm\Model, multitype:\Orm\Model >
+	 */
+	public static function get_answers($round_id /* = 14 */, $user_id /* = 1 */) {
+        return Model_Answer::find('all', array (
+							'where' => array (
+									  array('round_id',     "=", $round_id)
+									, array('user_id',      "=", $user_id)
+							)
+						));
+	}
+	
+	/**
+	 * create_answer
+	 * 解答ヘッダのレコードを生成
+	 * 
+	 * @param int $round_id  実施回
+	 * @param int $user_id   ユーザID
+	 * @param int $frequency 回数
+	 * @return number
+	 */
+	public static function create_answer($round_id /* = 14 */, $user_id /* = 1 */, $frequency /* = 1 */) {
+		$answer = Model_Answer::forge(array(
+			'round_id'     => $round_id,				// 実施回
+			'user_id'      => $user_id,					// ユーザID
+			'frequency'    => $frequency,				// 回数
+			'finish_flag'  => 0,						// 初期値は0
+		));
+	
+		if ($answer and $answer->save())
+		{
+			return $answer->id;
+		} else {
+			return 0;
+		}
+	}
 }

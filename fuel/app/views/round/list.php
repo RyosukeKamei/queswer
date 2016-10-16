@@ -21,22 +21,22 @@
 						<!-- 試験を開始 -->
 						<?php 
 						  echo 
-						      Html::anchor('question/new/'.$item->id, 
+						      Html::anchor('question/solve/'.$item->id, /* idはround_id */
 						      '<i class="icon-eye-open"></i> 試験を開始', 
 						      array('class' => 'btn btn-default btn-sm'));
 						?>
 						<!-- 試験の続き -->
 						<?php 
 						  echo
-						      Html::anchor('question/continue/'.$item->id,
+						      Html::anchor('question/solve/'.$item->id, /* idはround_id */
 						      '<i class="icon-wrench"></i> 試験の続き',
 						      array('class' => 'btn btn-default btn-sm'));
 						?>
-						<!-- 試験を途中でやめる -->
+						<!-- 履歴 -->
 						<?php 
 						  echo
 						      Html::anchor('question/finish/'.$item->id,
-						      '<i class="icon-trash icon-white"></i> 試験を途中でやめる',
+						      '<i class="icon-trash icon-white"></i> 試験解答の履歴',
 						      array('class' => 'btn btn-sm btn-danger', 'onclick' => "return confirm('途中まで行った試験の回答を削除しますがよろしいでしょうか？')")); ?>
 					</div>
 				</div>

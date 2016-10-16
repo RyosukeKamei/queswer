@@ -6,20 +6,20 @@ class Controller_Question extends Controller_Template
 	{
 		parent::before();
 		
-		//許可するアクション
- 		$action = array('index');
- 		//アクティブなアクション
- 		$active = Request::active()->action;
+// 		//許可するアクション
+//  		$action = array('index');
+//  		//アクティブなアクション
+//  		$active = Request::active()->action;
 	 		
-		//ログイン画面にリダイレクト
-		if (!Auth::check()) {
-			Response::redirect('admin/login');
-		}
+// 		//ログイン画面にリダイレクト
+// 		if (!Auth::check()) {
+// 			Response::redirect('admin/login');
+// 		}
 		
-		//管理者アクセス不可の場合、管理者一覧画面にリダイレクト ※暫定
-		if (!in_array($active, $action, true)) {
-			Response::redirect('admin/index');
-		}
+// 		//管理者アクセス不可の場合、管理者一覧画面にリダイレクト ※暫定
+// 		if (!in_array($active, $action, true)) {
+// 			Response::redirect('admin/index');
+// 		}
 	}
 	
     /**
@@ -395,6 +395,8 @@ class Controller_Question extends Controller_Template
 							),
         					'order_by' => array('question_number' => 'asc'),
 						));
+        echo($answers->question_number);exit();
+        
         
         /*
          * $answersがない場合は全問終了
