@@ -13,13 +13,24 @@ class Controller_Keyword extends Controller_Template
 	public function before()
 	{
 		parent::before();
-		$is_admin = Session::get('is_admin');
 	
+ 		//許可するアクション
+ 		$action = array('view');
+ 		//アクティブなアクション
+ 		$active = Request::active()->action;
+	 		
 		//ログイン画面にリダイレクト
-		if (!$is_admin) {
+		if (!Auth::check()) {
 			Response::redirect('admin/login');
 		}
+		
+		//管理者アクセス不可の場合、管理者一覧画面にリダイレクト ※暫定
+		if (!in_array($active, $action, true)) {
+			Response::redirect('admin/index');
+		}
 	}
+	
+	
 	/**
 	 * action_index
 	 * キーワード画面の一覧

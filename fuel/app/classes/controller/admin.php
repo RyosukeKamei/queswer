@@ -291,7 +291,7 @@ class Controller_Admin extends Controller_Template
 	{
 		//before()をオーバーライドするので、親クラスのbefore()を呼び出す
 		parent::before();
-	
+			
 		//認証済みでなく、現在リクエストされているアクションが'login'でない場合は
 		//ログインフォームにリダイレクト
 		if (!Auth::check() and Request::active()->action != 'login')
@@ -305,9 +305,6 @@ class Controller_Admin extends Controller_Template
 		{
 			$this->is_admin = true;
 		}
-		
-		//管理者フラグをセッション変数にセットする
-		Session::set('is_admin', $this->is_admin);
 		
 		//is_adminプロパティをビューに受け渡す
 		View::set_global('is_admin', $this->is_admin);
@@ -333,8 +330,6 @@ class Controller_Admin extends Controller_Template
 	        //認証に成功したら会員トップページにリダイレクト
 	        if ($auth->login($username, $password))
 	        {
-	        	//管理者フラグをセッション変数にセットする
-	        	Session::set('is_admin', true);
 	        	//リダイレクト
 	            Response::redirect('keyword/index');
 	        }
@@ -358,9 +353,6 @@ class Controller_Admin extends Controller_Template
 		$auth = Auth::instance();
 		$auth->logout();
 		
-		//管理者フラグのセッション変数を削除する
-		Session::delete('is_admin');
-	
 		//ログイン画面にリダイレクト
 		Response::redirect('admin/login');
 	}

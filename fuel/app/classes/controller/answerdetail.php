@@ -1,6 +1,26 @@
 <?php
 class Controller_Answerdetail extends Controller_Template
 {
+	
+	public function before()
+	{
+		parent::before();
+	
+		//許可するアクション
+		$action = array('view');
+		//アクティブなアクション
+		$active = Request::active()->action;
+	
+		//ログイン画面にリダイレクト
+		if (!Auth::check()) {
+			Response::redirect('admin/login');
+		}
+	
+		//管理者アクセス不可の場合、管理者一覧画面にリダイレクト ※暫定
+		if (!in_array($active, $action, true)) {
+			Response::redirect('admin/index');
+		}
+	}
 
 	public function action_index()
 	{
