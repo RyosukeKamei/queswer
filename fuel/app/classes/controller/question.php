@@ -1,7 +1,6 @@
 <?php
 class Controller_Question extends Controller_Template
 {
-	
 	public function before()
 	{
 		parent::before();
@@ -12,7 +11,7 @@ class Controller_Question extends Controller_Template
 			Response::redirect('admin/login');
 		}
 	}
-
+	
     /**
      * action_index
      * 問題一覧
@@ -237,66 +236,16 @@ class Controller_Question extends Controller_Template
         is_null($question_number) and Response::redirect('question');
         
         /*
-         * データを取得
-         * ・問題１レコード
-         * ・選択肢４レコード
-         * ・小項目の問題（リンク）多レコード
-         * ・中項目のキーワード多レコード
-         * 
-         * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
-         * 7. 変数は一度だけ書き込み、無駄な変数は削除する
-         * 
-         */ 
-        //-- WHEREを整理
-        $question_wheres['question_number'] = $question_number;
-        $question_wheres['round_id']        = $round_id;
-        //-- データ取得
-        $data['questions'] = Model_Question::get_questions($question_wheres, 1);
-        //-- 変数スコープを明示
-        $question_wheres = null;
-        
-        if ( ! $data['questions'] )
-        {
-            /*
-             * ほとんどありえないエラー（SQLエラー）
-             */
-            Session::set_flash(
-                  'error'
-                , '問題取得（questionsテーブル）に失敗しました。 問題番号 '.$question_number);
-            
-            /*
-             * @todo
-             * リダイレクト先は後から考える
-             * 候補 round/index/3？
-             */
-             Response::redirect('question');
-        }
-
-        /*
-         * 問題取得成功
-         * 
-         * 選択肢を取得
-         * 引数が一つだけなら、find_byを使う
-         * 
-         * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
-         * 5. フレームワークの作法に従い、ライブラリを活用することで、コーディング負荷は軽減される
+         * 問題文を取得
+         * 失敗するとFATAL ERRORでリダイレクト
          */
-        if ( ! $data['choices'] = Model_Choice::find_by('question_id', $data['questions']->id))
-        {
-            /*
-             * ほとんどありえないエラー（SQLエラー）
-             */
-            Session::set_flash(
-                  'error'
-                , '選択肢取得（choicesテーブル）に失敗しました。 問題番号 '.$question_number);
-  
-            /*
-             * @todo
-             * リダイレクト先は後から考える
-             * 候補 round/index/3？
-             */
-            Response::redirect('question');
-        }
+        $data['questions'] = $this->get_questions($round_id, $question_number);
+        
+        /*
+         * 選択肢を取得
+         * 失敗するとFATAL ERRORでリダイレクト
+         */
+        $data['choices'] = $this->get_choices($data['questions']->id);  
         
         /*
          * この問題に出てくるキーワード 下記SQLの結果
@@ -355,93 +304,223 @@ class Controller_Question extends Controller_Template
      * action_solve
      * 解答し、次の問題を取得
      * 
-     * @todo
-     * 田保さんへ詳細設計を書いてみました〜
-     * 
      * パターン1 初めて問題に取り組む場合
-     * 入力 $round_id = 15 $answer_id = 0, $answer = 0
+     * 入力 $round_id = 15 $mode = 'init'
      * answers（1レコード）とanswerdetails（80レコード）を生成
      * １問目を取得（answer_idから、answerカラムがnullで、一番若いレコードを取得）
      * 
      * パターン2 一覧画面から「続き」をクリックした場合
-     * 入力 $round_id = 0 $answer_id = {int}, $answer = null
+     * 入力 $round_id = 15 $mode = 'continue'
      * answer_idから、answerカラムがnullで、一番若いレコードを取得
      * 
      * パターン3 問題画面で解答した場合
-     * 入力 $round_id = 0 $answer_id = {int}, $answer = {int}
+     * 入力 $round_id = 0 $mode = null POSTで値を取得
      * answer_idから、answerカラムがnullで、一番若いレコードにanswerの値を入れる
      * answer_idから、answerカラムがnullで、一番若いレコードを取得
      * 
      * @param int $round_id 実施回 平成28年度春応用情報技術者試験の場合は15
-     * @param int $answer_id 解答を格納するテーブルのヘッダID
-     * @param int $answer 答え（1:ア 2:イ 3:ウ 4:エ）
+     * @param int $answer_id 一覧画面から「続き」をクリックした場合値が入る
      */
-    public function action_solve($round_id, $answer_id = 0, $answer = 0) {
+    public function action_solve($round_id = 0, $answer_id = 0) {
         /*
-         * 一覧画面から問題画面に遷移する前に初期化する
-         * 例
-         * round_id = 15 平成28年度春応用情報技術者試験
-         * answer_id = 1 回答ヘッダのid nullの場合は初回なので初期化する
+         * 新規の場合：answer_idなし
+         * 続きの場合：answer_idあり
+         * 解答の場合」answer_idをPOSTから取得
          */
+    	if(Input::post('answer_id')) {
+	    	/*
+	    	 * 解答の場合
+	    	 */
+    		$answer_id = Input::post('answer_id');
+    	} elseif((int)$answer_id === 0) {
+	    	/*
+    		 * 新規の場合
+    		 * 初期化（80レコード作成）をしてanswer_idを取得
+	    	 * 2. 続きをする場合
+    		 * ブラウザ入力された$answer_idそのまま
+    		 */
+    		$answer_id = $this->answer_init($round_id);
+    	} elseif($answer_id) {
+    		/*
+    		 * 続きの場合
+    		 * 何もしない
+    		 */
+    	}
 
         /*
-         * 答えが入力された場合は
-         * 解答する
-         * 
-         * たぼっちへ
-         * ここは最後
+         * 答えが入力された場合は解答する
          */
-        if($answer_id && $answer) {
+        if(Input::post('answer_id') && Input::post('question_number') && Input::post('answer')) {
             /*
              * answerdetailsのanswerにデータが入る
              */
-            $this->answer($answer_id, $answer);
+            if(! Model_Answerdetail::answered(Input::post('answer_id'), Input::post('question_number'), Input::post('answer')))
+            {
+            	/*
+            	 * ほとんどありえないエラー（SQLエラー）
+            	 */
+            	Session::set_flash(
+            			  'error'
+            			, 'FATAL 解答の更新に失敗しました。 '.Input::post('answer_id'));
+            	 
+            	/*
+            	 * @todo
+            	 * リダイレクト先は後から考える
+            	 * 候補 round/index/3？
+            	*/
+            	Response::redirect('question');
+            }
         }
-
         
         /*
-         * 1. 初めて問題を解く場合
-         * 初期化をしてanswer_idを取得
-         * 2. 続きをする場合
-         * ブラウザ入力された$answer_idそのまま
-         * 
-         * たぼっちへ
-         * ここがはじめ
-         */
-        if(!$answer_id) {
-            $answer_id = answer_init($round_id);
-        }
-        
-        /*
+         * 共通
          * 次の問題を取得
          * answer_idからanswerdetailsを見て、answerにデータがなく一番若いレコードを取得
-         * 
-         * たぼっちへ
-         * ここが２つ目
+         * question_numberを取得
          */
-        $answers = $this->get_next_question($answer_id);
+        $answers = Model_Answerdetail::find('first', array (
+							'where' => array (
+									array('answer_id', "=", $answer_id),
+									array('answer', "IS", NULL),
+							),
+        					'order_by' => array('question_number' => 'asc'),
+						));
         
+        /*
+         * $answersがない場合は全問終了
+         */
+        if($answers) {
+			/*
+			 * 続きがある場合は問題文を取得
+			 */
+			
+			/*
+			 * answer_idは使いまわすのでここでビューに渡す
+			 */
+        	$data['answer_id'] = $answer_id;
+        
+			/*
+			 * 問題文を取得
+			 */
+			$data['questions'] = $this->get_questions($round_id, $answers->question_number);
+
+			/*
+			 * 選択肢を取得
+			 */
+			$data['choices'] = $this->get_choices($data['questions']->id); 
+        } else {
+        	/*
+        	 * answersにfinish_flagを立てる
+        	 */
+        	if(! Model_Answer::answer_finished($answer_id))
+        	{
+        		/*
+        		 * ほとんどありえないエラー（SQLエラー）
+        		 */
+        		Session::set_flash(
+        		'error'
+        				, 'FATAL 解答の終了に失敗しました。 '.Input::post('answer_id'));
+        	
+        		/*
+        		 * @todo
+        		 * リダイレクト先は後から考える
+        		 * 候補 round/index/3？
+        		 */
+        		Response::redirect('question');
+        	} else {
+				/*
+				 * 80問終了の場合はリダイレクト
+				 * 問題一覧にリダイレクト
+				 */
+				Session::set_flash(
+					  'success'
+					, 'お疲れ様です。80問すべて解答しました。');
+				Response::redirect('answerdetail/list/'.$answer_id);
+			}
+        }
+
+        /*
+         * タイトルは加工
+         */
+        $this->template->title =
+        $data['questions']->round->round_name
+        .' ' .$data['questions']->round->examination->examination_name
+        .' 過去問'.$data['questions']->question_number;
+        $this->template->content = View::forge('question/solve', $data, false);
         
     }
     
     /**
-     * answer
-     * answerdetailsのanswerにデータが入る
-     * 
-     * answer_idからanswerdetailを取得
-     * WHERE句はanswer_idとanswerがNULLで一番若いレコード
-     * 
-     * @param int $answer_id
-     * @param int $answer
+     * データを取得
+     *
+     * @param int $round_id
+     * @param int $question_number
+     * @return array $questions 問題文のレコード
      */
-    private function answer($answer_id, $answer) {
-        /*
-         * UPDATE文作成
-         */
-        
-        /*
-         * UPDATE文実行
-         */
+    private function get_questions($round_id, $question_number) {
+    	//-- WHEREを整理
+    	$question_wheres['question_number'] = $question_number;
+    	$question_wheres['round_id']        = $round_id;
+    	//-- データ取得
+    	$questions = Model_Question::get_questions($question_wheres, 1);
+    	//-- 変数スコープを明示
+    	$question_wheres = null;
+    	
+    	if ( ! $questions )
+    	{
+    		/*
+    		 * ほとんどありえないエラー（SQLエラー）
+    		 */
+    		Session::set_flash(
+    		'error'
+    				, '問題取得（questionsテーブル）に失敗しました。 問題番号 '.$question_number);
+    	
+    		/*
+    		 * @todo
+    		 * リダイレクト先は後から考える
+    		 * 候補 round/index/3？
+    		*/
+    		Response::redirect('question');
+    	}
+    	
+    	return $questions;
+    }
+    
+    /**
+     * get_choices
+     * 
+     * 
+     * @param int $questions_id
+     * @return array choices 選択肢配列
+     */
+    private function get_choices($questions_id) {
+    	/*
+    	 * 問題取得成功
+    	 *
+    	 * 選択肢を取得
+    	 * 引数が一つだけなら、find_byを使う
+    	 *
+    	 * ●命名規則「3ヶ月後の自分自身に優しく、チームに優しく、まだ見ぬメンバーに優しく」
+    	 * 5. フレームワークの作法に従い、ライブラリを活用することで、コーディング負荷は軽減される
+    	 */
+    	if ( ! $choices = Model_Choice::find_by('question_id', $questions_id))
+    	{
+    		/*
+    		 * ほとんどありえないエラー（SQLエラー）
+    		 */
+    		Session::set_flash(
+    		'error'
+    				, '選択肢取得（choicesテーブル）に失敗しました');
+    	
+    		/*
+    		 * @todo
+    		 * リダイレクト先は後から考える
+    		 * 候補 round/index/3？
+    		*/
+    		Response::redirect('question');
+    	}
+    	
+    	return $choices;
     }
     
     /**
@@ -455,6 +534,12 @@ class Controller_Question extends Controller_Template
      */
     private function answer_init($round_id) {
         /*
+         * @ToDo
+         * Oauth実装後にユーザIDを取得するロジックに変更
+         */
+    	$user_id = 1; // スタブ
+        
+        /*
          * $pdoを取得
          * トランザクションとQuesitonをINSERTした後のidを取得
          */
@@ -466,29 +551,23 @@ class Controller_Question extends Controller_Template
          * $round_idから、前回のfrequencyを取得
          * 「前回の」なので + 1して「今回」にする
          */
-        $frequency = $this->get_frequency ( $round_id ) + 1;
+        $frequency_result = Model_Answer::get_answers ( $round_id, /* = 14 */ $user_id /* = 1 */ );
+        $frequency = count($frequency_result) + 1; // 今回の実施回frequency
+
+        $answer_id = Model_Answer::create_answer($round_id, $user_id, $frequency);
         
-        /*
-         * create_answers メソッド
-         * ヘッダの1レコード生成
-         */
-        if ($this->create_answers ( $round_id, $frequency )) {
-            /*
-             * answer_idは問題文を取得するのに利用する
-             */
-            $answer_id = $pdo->lastInsertId ( 'id' );
-            
+        if (0 < $answer_id) {
             /*
              * create_answer_details メソッド
              * answerdetail（80レコード）を生成
              */
-            if (! $this->create_answer_details ( $answer_id )) {
+            if (! Model_Answerdetail::create_answer_details ( $answer_id )) {
                 /*
                  * レコードができなかったらFatal Error
                  * 本来ユニットテストで対応するからありえないはず
                  *
                  */
-                Session::set_flash ( 'error', 'FATAL ERROR answerdetailsレコード生成ができませんでした。 ' );
+                Session::set_flash ( 'error', 'FATAL ERROR 解答詳細(answerdetails)レコード生成ができませんでした。 ' );
             } else {
                 /*
                  * 解答ヘッダ（answers）と解答詳細（answerdetails）が生成されたら成功なので
@@ -514,94 +593,6 @@ class Controller_Question extends Controller_Template
     }
     
     /**
-     * get_frequency
-     * answerテーブルをround_idとuser_idでフィルタし
-     * その実施回が何回目かを取得
-     * 
-     * @param int $round_id 実際回（平成28年度応用情報技術者試験 15）
-     * @return int $frequency 実施回数（平成28年度応用情報技術者試験 2回目）
-     */
-    public function get_frequency($round_id) {
-        $frequency = 0;
-        
-        /*
-         * たぼっちへ
-         * コーディングしてね
-         */
-        
-        /*
-         * SELECT文
-         * 
-         */
-        
-        /*
-         * 実行
-         */
-        
-        return $frequency;
-    }
-    
-    /**
-     * create_answers
-     * answerテーブルを生成
-     * 
-     * @param int $round_id 実際回（平成28年度応用情報技術者試験 15）
-     * @param int $frequency 実施回数（平成28年度応用情報技術者試験 2回目）
-     * @return boolean $success INSERT文成功したかどうか
-     */
-    public function create_answers( $round_id, $frequency ) {
-        /*
-         * たぼっちへ
-         * コーディングしてね
-         */
-        $success = false;
-        
-        /*
-         * INSERT文
-         */
-        
-        /*
-         * INSERT文実行
-         */
-        
-        return $success;
-    }
-    
-    /**
-     * create_answer_details
-     * answerdetailテーブルを生成
-     * answerはnullでquestion_numだけ
-     * 80レコード
-     * 
-     * @param unknown $answer_id
-     * @return boolean
-     */
-    public function create_answer_details($answer_id) {
-        /*
-         * たぼっちへ
-         * コーディングしてね
-         */
-        $success = false;
-        
-        /*
-         * 80レコード生成
-         */
-        $sql = "";
-        for($question_num = 1; $question_num <= 80; $question_num++) {
-            /*
-             * 1レコードずつ
-             */
-            
-        }
-        
-        /*
-         * SQL実行
-         */
-        
-        return $success;
-    }
-    
-    /**
      * get_next_question
      * 次の問題を取得
      * answer_idとanswerがnullで一番若いレコードが次の問題
@@ -615,6 +606,12 @@ class Controller_Question extends Controller_Template
         /*
          * SELECT生成
          */
+        $next_questions = find('first', array (
+							'where' => array (
+									array('answer', "IS", NULL),
+							),
+        					'order_by' => array('question_number' => 'asc'),
+						));
         
         /*
          * SELECT実行
@@ -689,7 +686,7 @@ class Controller_Question extends Controller_Template
             /*
              * QuestionとChoiceのINSERTを実行
              */
-            if($this->create_question()) {
+            if($this->create_question(Input::post())) {
 				/*
 				 * INSERTが成功したら
 				 * 次の$beforequestion_idにリダイレクト
@@ -723,18 +720,22 @@ class Controller_Question extends Controller_Template
         $data['questions']['conveted_question_body'] = 
         		$this->removed_tag_and_contents(
         			$this->removed_tag_and_contents(
-        	    		$before_questions->question_body
+        	    		strip_tags($before_questions->question_body, '<p><img><sup><sub><span><ul><h3>')
         			    , 'ul'
         			)
         			, 'h3'
         		);
+        $data['questions']['conveted_question_body'] = str_replace('http://korejoap.info/image', '/assets/img', $data['questions']['conveted_question_body']);
+        $data['questions']['conveted_question_body'] = str_replace('/question/', '/', $data['questions']['conveted_question_body']);
+        $data['questions']['conveted_question_body'] = str_replace('alt=', 'class="img-responsive" alt=', $data['questions']['conveted_question_body']);
+        $data['questions']['conveted_question_body'] = str_replace('<p></p>', '', $data['questions']['conveted_question_body']);
         
         /*
          * 解説から不要な文言を除去
          */
         $data['questions']['conveted_question_commentary'] =
 			$this->removed_tag_and_contents(
-				  $before_questions->question_commentary
+				  strip_tags($before_questions->question_commentary, '<p><img><sup><sub><span><ul><h3><iframe>')
         		, 'h3'
         );
         
@@ -1035,6 +1036,15 @@ class Controller_Question extends Controller_Template
         			, $body
         	);
     }
+
+    public static function removed_tag_header($body, $tag_name) {
+    	return
+    	preg_replace(
+    			'{<'.$tag_name.'(.*)'.'>}'
+    			, ''
+    			, $body
+    	);
+    }
     
     /**
      * convert_choice
@@ -1072,7 +1082,7 @@ class Controller_Question extends Controller_Template
         preg_match("{<li>ア：(.*?)</li>}u", $question_body, $temp_choice);
         if(isset($temp_choice[1])) 
         {
-            $choices[1] = $temp_choice[1];
+            $choices[1] = strip_tags($temp_choice[1], '<sup><sub><span>');
         } else 
         {
             $choices[1] = '';
@@ -1082,7 +1092,7 @@ class Controller_Question extends Controller_Template
         preg_match("{<li>イ：(.*?)</li>}u", $question_body, $temp_choice);
         if(isset($temp_choice[1])) 
         {
-            $choices[2] = $temp_choice[1];
+            $choices[2] = strip_tags($temp_choice[1], '<sup><sub><span>');
         } else 
         {
             $choices[2] = '';
@@ -1092,7 +1102,7 @@ class Controller_Question extends Controller_Template
         preg_match("{<li>ウ：(.*?)</li>}u", $question_body, $temp_choice);
         if(isset($temp_choice[1])) 
         {
-            $choices[3] = $temp_choice[1];
+            $choices[3] = strip_tags($temp_choice[1], '<sup><sub><span>');
         } else 
         {
             $choices[3] = '';
@@ -1102,7 +1112,7 @@ class Controller_Question extends Controller_Template
         preg_match("{<li>エ：(.*?)</li>}u", $question_body, $temp_choice);
         if(isset($temp_choice[1]))
         {
-            $choices[4] = $temp_choice[1];
+            $choices[4] = strip_tags($temp_choice[1], '<sup><sub><span>');
         } else 
         {
             $choices[4] = '';

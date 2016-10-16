@@ -10,7 +10,6 @@
  */
 class Controller_Keyword extends Controller_Template
 {
-	
 	public function before()
 	{
 		parent::before();
@@ -21,7 +20,6 @@ class Controller_Keyword extends Controller_Template
 			Response::redirect('admin/login');
 		}
 	}
-
 	/**
 	 * action_index
 	 * キーワード画面の一覧
@@ -30,8 +28,17 @@ class Controller_Keyword extends Controller_Template
 	 */
     public function action_index()
 	{
-		$data['keywords'] = Model_Keyword::find('all');
-		$this->template->title = "Keywords";
+// 		$data['keywords'] = Model_Keyword::find('all');
+ 		$data['keywords'] = Model_Keyword::find('all'
+ 								, array(
+								    'where' => array(
+								          array('keyword', 'like', '%'.Input::post('keyword').'%')
+								    	,
+							    	)
+ 									,
+ 								)
+ 							);
+		$this->template->title = "キーワード一覧";
 		$this->template->content = View::forge('keyword/index', $data);
 
 	}
