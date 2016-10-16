@@ -15,7 +15,7 @@ class Controller_Keyword extends Controller_Template
 		parent::before();
 	
  		//許可するアクション
- 		$action = array('view');
+ 		$action = array('view', 'index');
  		//アクティブなアクション
  		$active = Request::active()->action;
 	 		
@@ -39,19 +39,13 @@ class Controller_Keyword extends Controller_Template
 	 */
     public function action_index()
 	{
-// 		$data['keywords'] = Model_Keyword::find('all');
- 		$data['keywords'] = Model_Keyword::find('all'
- 								, array(
-								    'where' => array(
-								          array('keyword', 'like', '%'.Input::post('keyword').'%')
-								    	,
-							    	)
- 									,
+ 		$data['keywords'] = Model_Keyword::find('all', array (
+ 								'where' => array (
+ 									array('keyword', 'like', '%'.Input::post('keyword').'%')
  								)
- 							);
+ 							));
 		$this->template->title = "キーワード一覧";
 		$this->template->content = View::forge('keyword/index', $data);
-
 	}
 
 	/**
