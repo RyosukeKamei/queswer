@@ -46,12 +46,24 @@ class Model_Answer extends Model
 	 * @return Ambigous <\Orm\Model, multitype:\Orm\Model >
 	 */
 	public static function get_answers($round_id /* = 14 */, $user_id /* = 1 */) {
-        return Model_Answer::find('all', array (
+		return Model_Answer::find('all', array (
 							'where' => array (
 									  array('round_id',     "=", $round_id)
 									, array('user_id',      "=", $user_id)
 							)
 						));
+	}
+	
+	public static function check_exist_answers($round_id /* = 14 */, $user_id /* = 1 */) {
+		$answers = Model_Answer::find('all', array (
+							'where' => array (
+									  array('round_id',     "=", $round_id)
+									, array('user_id',      "=", $user_id)
+									, array('finish_flag',  "=", 1)
+							)
+		));
+		
+		return count($answers);
 	}
 	
 	/**

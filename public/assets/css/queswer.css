@@ -1,0 +1,35 @@
+@CHARSET "UTF-8";
+
+/*
+ * 枠
+ */
+.question_box {
+    border: 1px #000000 solid;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/*
+ * ハット（オーバーライン）
+ */
+span.overline {
+	text-decoration: overline;
+}
+
+/*
+ *  動画レスポンシブル
+ */
+.youtube {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+}
+
+.youtube iframe {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+

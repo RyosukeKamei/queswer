@@ -356,6 +356,13 @@ class Controller_Question extends Controller_Template
     		 * 何もしない
     		 */
     	}
+    	
+    	/*
+    	 * $answer_idが存在しない場合は戻る
+    	 */
+    	if(!$answer_id) {
+    		Response::redirect('round/list/3');
+    	}
 
         /*
          * 答えが入力された場合は解答する
@@ -559,48 +566,57 @@ class Controller_Question extends Controller_Template
         $pdo->beginTransaction();
         
         /*
-         * $round_idから、前回のfrequencyを取得
-         * 「前回の」なので + 1して「今回」にする
+         * 重複防止制御
+         * finish_flagが1つでも立っていれば、重複しているのでレコードは生成しない
          */
-        $frequency_result = Model_Answer::get_answers ( $round_id, /* = 14 */ $user_id /* = 1 */ );
-        $frequency = count($frequency_result) + 1; // 今回の実施回frequency
+        if(!Model_Answer::check_exist_answers ( $round_id, /* = 14 */ $user_id /* = 1 */ ))
+        {
+	        /*
+    	     * $round_idから、前回のfrequencyを取得
+        	 * 「前回の」なので + 1して「今回」にする
+	         */
+    	    $frequency_result = Model_Answer::get_answers ( $round_id, /* = 14 */ $user_id /* = 1 */ );
+        	$frequency = count($frequency_result) + 1; // 今回の実施回frequency
 
-        $answer_id = Model_Answer::create_answer($round_id, $user_id, $frequency);
+	        $answer_id = Model_Answer::create_answer($round_id, $user_id, $frequency);
 
-        if (0 < $answer_id) {
-            /*
-             * create_answer_details メソッド
-             * answerdetail（80レコード）を生成
-             */
-            if (! Model_Answerdetail::create_answer_details ( $answer_id )) {
-                /*
-                 * レコードができなかったらFatal Error
-                 * 本来ユニットテストで対応するからありえないはず
-                 *
-                 */
-                Session::set_flash ( 'error', 'FATAL ERROR 解答詳細(answerdetails)レコード生成ができませんでした。 ' );
-            } else {
-                /*
-                 * 解答ヘッダ（answers）と解答詳細（answerdetails）が生成されたら成功なので
-                 * answer_idを返す
-                 */
-                $pdo->commit();
-                return $answer_id;
-            }
-        } else {
-            /*
-             * レコードができなかったらFatal Error
-             * 本来ユニットテストで対応するからありえないはず
-             */
-            Session::set_flash ( 'error', 'FATAL ERROR answersレコード生成ができませんでした。 ' );
+    	    if (0 < $answer_id) {
+        	    /*
+            	 * create_answer_details メソッド
+	             * answerdetail（80レコード）を生成
+    	         */
+        	    if (! Model_Answerdetail::create_answer_details ( $answer_id )) {
+            	    /*
+                	 * レコードができなかったらFatal Error
+	                 * 本来ユニットテストで対応するからありえないはず
+    	             *
+        	         */
+            	    Session::set_flash ( 'error', 'FATAL ERROR 解答詳細(answerdetails)レコード生成ができませんでした。 ' );
+	            } else {
+    	            /*
+        	         * 解答ヘッダ（answers）と解答詳細（answerdetails）が生成されたら成功なので
+            	     * answer_idを返す
+                	 */
+	                $pdo->commit();
+    	            return $answer_id;
+        	    }
+	        } else {
+    	        /*
+        	     * レコードができなかったらFatal Error
+            	 * 本来ユニットテストで対応するからありえないはず
+	             */
+    	        Session::set_flash ( 'error', 'FATAL ERROR answersレコード生成ができませんでした。 ' );
+        	}
+	        /*
+    	     * 正しければ、コミットされてreturnされる
+        	 * ここまできたらエラーってこと
+	         * ロールバックしてリダイレクト
+    	     */
+        	$pdo->rollback();
+        	Response::redirect ( 'question' );
         }
-        /*
-         * 正しければ、コミットされてreturnされる
-         * ここまできたらエラーってこと
-         * ロールバックしてリダイレクト
-         */
-        $pdo->rollback();
-        Response::redirect ( 'question' );
+        
+        return 0;
     }
     
     /**
