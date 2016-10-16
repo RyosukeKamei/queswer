@@ -395,7 +395,6 @@ class Controller_Question extends Controller_Template
 							),
         					'order_by' => array('question_number' => 'asc'),
 						));
-        echo($answers->question_number);exit();
         
         
         /*
@@ -567,7 +566,7 @@ class Controller_Question extends Controller_Template
         $frequency = count($frequency_result) + 1; // 今回の実施回frequency
 
         $answer_id = Model_Answer::create_answer($round_id, $user_id, $frequency);
-        
+
         if (0 < $answer_id) {
             /*
              * create_answer_details メソッド

@@ -35,18 +35,59 @@ class Model_Answerdetail extends Model
 		return $val;
 	}
 	
-	public static function create_answer_details($answer_id) {
-		for($question_number = 1; $question_number <= 80; $question_number++) {
-			$answer_detail = Model_Answerdetail::forge(array(
+	/**
+	 * create_answer_details
+	 * 解答レコードを80個生成
+	 * 
+	 * @param int $answer_id 解答ID
+	 * @return boolean
+	 */
+	public static function create_answer_details($answer_id) 
+	{
+		for($question_number = 1; $question_number <= 80; $question_number++) 
+		{
+			$answerdetail = Model_Answerdetail::forge(
+				array(
 					'question_number'     => $question_number,		// 問題番号
 					'answer_id'      => $answer_id,					// 解答ヘッダID
-			));
+				)
+			);
 			
-			if (!($answer_detail and $answer_detail->save())) {
+			if (!($answerdetail and $answerdetail->save())) 
+			{
 				return false;
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * answered
+	 * 解答
+	 * 
+	 * @param int $answer_id
+	 * @param int $question_number
+	 * @param int $answer
+	 * @return boolean
+	 */
+	public static function answered($answer_id, $question_number, $answer) 
+	{
+		$answerdetail = Model_Answerdetail::find('first', array (
+							'where' => array (
+									  array('answer_id',     "=", $answer_id)
+									, array('question_number',      "=", $question_number)
+							)
+						));
+		$answerdetail->answer = $answer;
+		
+		if (!($answerdetail and $answerdetail->save())) 
+		{
+			return false;
+		} 
+		else 
+		{
+			return true;
+		}
 	}
 
 }

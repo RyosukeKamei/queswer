@@ -63,7 +63,8 @@ class Model_Answer extends Model
 	 * @param int $frequency 回数
 	 * @return number
 	 */
-	public static function create_answer($round_id /* = 14 */, $user_id /* = 1 */, $frequency /* = 1 */) {
+	public static function create_answer($round_id /* = 14 */, $user_id /* = 1 */, $frequency /* = 1 */) 
+	{
 		$answer = Model_Answer::forge(array(
 			'round_id'     => $round_id,				// 実施回
 			'user_id'      => $user_id,					// ユーザID
@@ -77,5 +78,28 @@ class Model_Answer extends Model
 		} else {
 			return 0;
 		}
+	}
+	
+	/**
+	 * answer_finished
+	 * 解答終了
+	 * 
+	 * @param int $answer_id
+	 * @return boolean
+	 */
+	public static function answer_finished($answer_id)
+	{
+		$answer = Model_Answer::find($answer_id);
+		$answer->finish_flag = 1;
+		
+		if (!($answer and $answer->save()))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+		
 	}
 }
