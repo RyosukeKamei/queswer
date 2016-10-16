@@ -37,7 +37,7 @@
 						  echo
 						      Html::anchor('question/finish/'.$item->id,
 						      '<i class="icon-trash icon-white"></i> 試験解答の履歴',
-						      array('class' => 'btn btn-sm btn-danger', 'onclick' => "return confirm('途中まで行った試験の回答を削除しますがよろしいでしょうか？')")); ?>
+						      array('class' => 'btn btn-sm btn-primary', 'onclick' => "return confirm('途中まで行った試験の回答を削除しますがよろしいでしょうか？')")); ?>
 					</div>
 				</div>
 

@@ -31,8 +31,31 @@ class Controller_Round extends Controller_Template
 //                 ->where('examination.id', 3)
                 // FROMのテーブルをWHEREするときは指定しない（指定するとエラー）
                 ->where('examination_id', 3)
+                // ORDER BY
+                ->order_by('id', 'desc')
                 // get_oneで１レコード取得
                 ->get();
+            
+            // select 文を準備します
+//             SELECT * FROM rounds
+//             INNER JOIN examinations ON rounds.examination_id = examinations.id
+//             LEFT JOIN answers ON rounds.id = answers.round_id
+//               AND answers.finish_flag = 0
+//             WHERE rounds.examination_id = 3
+//             ORDER BY rounds.id DESC
+            $query = DB::select()->from('rounds');
+            // Join examinations table
+            $query->join('examinations', 'INNER');
+            $query->on('rounds.examination_id', '=', 'examinations.id');
+            // Join answers table
+            $query->join('answers', 'LEFT');
+            $query->on('rounds.id', '=', 'answers.round_id');
+            $query->and_on('answers.finish_flag', '=', db::expr(0));
+            $query->where('rounds.examination_id', 3);
+            $query->order_by('rounds.id', 'desc');
+            $result = $query->execute();
+            var_dump($result);
+            var_dump(count($result));
 	    }
         $this->template->title = "応用情報技術者試験午前";
 		$this->template->content = View::forge('round/list', $data);
