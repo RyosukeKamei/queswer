@@ -17,6 +17,49 @@ class Controller_Admin extends Controller_Template
 	//管理者かどうかを示すプロパティ
 	public $is_admin = false;
 
+	public function before()
+	{
+		//before()をオーバーライドするので、親クラスのbefore()を呼び出す
+		parent::before();
+	
+		//ユーザが管理者（Administratorsグループ）であれば
+		//is_adminプロパティをtrueに設定
+		//Auth::member(100)だと値が取れない？
+		if ((int)Auth::get('group') === 100)
+		{
+			$this->is_admin = true;
+				
+		}
+	
+		//is_adminプロパティをビューに受け渡す
+		View::set_global('is_admin', $this->is_admin);
+	
+		/*
+		 * 管理者ログインが必要なアクション
+		 * index
+		 * create
+		 * edit
+		 * delete
+		 *
+		 * 管理者ログインが不要なアクション
+		 * login
+		 * logout
+		*/
+		$admin_login_need_action = array('index', 'create', 'edit', 'delete');
+			
+		// 現在アクティブなアクション
+		$active = Request::active()->action;
+			
+		/*
+		 * ログインが必要な画面は認証をかける
+		 */
+		if(in_array($active, $admin_login_need_action, true)) {
+			if (!(Auth::check() && (int)Auth::get('group') === 100)) {
+				Response::redirect('admin/login');
+			}
+		}
+	}
+	
 	/**
 	 * action_index
 	 * Adminの一覧
@@ -54,20 +97,20 @@ class Controller_Admin extends Controller_Template
 	 * 
 	 * @param string $id
 	 */
-	public function action_view($id = null)
-	{
-		is_null($id) and Response::redirect('admin');
+// 	public function action_view($id = null)
+// 	{
+// 		is_null($id) and Response::redirect('admin');
 
-		if ( ! $data['admin'] = Model_Admin::find($id))
-		{
-			Session::set_flash('error', 'Could not find admin #'.$id);
-			Response::redirect('admin');
-		}
+// 		if ( ! $data['admin'] = Model_Admin::find($id))
+// 		{
+// 			Session::set_flash('error', 'Could not find admin #'.$id);
+// 			Response::redirect('admin');
+// 		}
 
-		$this->template->title = "管理者";
-		$this->template->content = View::forge('admin/view', $data);
+// 		$this->template->title = "管理者";
+// 		$this->template->content = View::forge('admin/view', $data);
 
-	}
+// 	}
 
 	/**
 	 * action_create
@@ -215,7 +258,8 @@ class Controller_Admin extends Controller_Template
 						$id
 						, Input::post('username')
 						, Input::post('email')
-						, Input::post('examination_id')
+// 						, Input::post('examination_id')
+						, 100
 				);
 				/*
 				 * ブラウザに表示する成功メッセージ
@@ -286,30 +330,7 @@ class Controller_Admin extends Controller_Template
 		Response::redirect('admin');
 
 	}
-	
-	public function before()
-	{
-		//before()をオーバーライドするので、親クラスのbefore()を呼び出す
-		parent::before();
-			
-		//認証済みでなく、現在リクエストされているアクションが'login'でない場合は
-		//ログインフォームにリダイレクト
-		if (!Auth::check() and Request::active()->action != 'login')
-		{
-			Response::redirect('admin/login');
-		}
-	
-		//ユーザが管理者（Administratorsグループ）であれば
-		//is_adminプロパティをtrueに設定
-		if (Auth::member(100))
-		{
-			$this->is_admin = true;
-		}
 		
-		//is_adminプロパティをビューに受け渡す
-		View::set_global('is_admin', $this->is_admin);
-	}
-	
 	/**
 	 * action_login
 	 * ログイン

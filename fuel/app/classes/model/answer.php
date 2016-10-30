@@ -59,7 +59,7 @@ class Model_Answer extends Model
 							'where' => array (
 									  array('round_id',     "=", $round_id)
 									, array('user_id',      "=", $user_id)
-									, array('finish_flag',  "=", 1)
+									, array('finish_flag',  "=", 0)
 							)
 		));
 		

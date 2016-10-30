@@ -6,20 +6,31 @@ class Controller_Question extends Controller_Template
 	{
 		parent::before();
 		
-// 		//許可するアクション
-//  		$action = array('index');
-//  		//アクティブなアクション
-//  		$active = Request::active()->action;
-	 		
-// 		//ログイン画面にリダイレクト
-// 		if (!Auth::check()) {
-// 			Response::redirect('admin/login');
-// 		}
-		
-// 		//管理者アクセス不可の場合、管理者一覧画面にリダイレクト ※暫定
-// 		if (!in_array($active, $action, true)) {
-// 			Response::redirect('admin/index');
-// 		}
+	 	/*
+ 		 * 管理者ログインが必要なアクション
+ 		 * index
+ 		 * create
+ 		 * edit
+ 		 * delete
+ 		 * convert
+ 		 * 
+ 		 * 管理者ログインが不要なアクション（会員用）
+ 		 * commentary
+ 		 * solve
+ 		 */
+ 		$admin_login_need_action = array('index', 'create', 'edit', 'delete', 'convert'); 
+ 		
+ 		// 現在アクティブなアクション
+ 		$active = Request::active()->action;
+ 		
+ 		/*
+ 		 * 管理者ログインが必要な画面は認証する
+ 		 */
+ 		if(in_array($active, $admin_login_need_action, true)) {
+ 			if (!(Auth::check() && (int)Auth::get('group') === 100)) {
+ 				Response::redirect('admin/login');
+ 			}
+ 		}
 	}
 	
     /**
@@ -356,7 +367,7 @@ class Controller_Question extends Controller_Template
     		 * 何もしない
     		 */
     	}
-    	
+
     	/*
     	 * $answer_idが存在しない場合は戻る
     	 */

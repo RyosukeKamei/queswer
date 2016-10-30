@@ -1,7 +1,33 @@
 <?php
 class Controller_Round extends Controller_Template
 {
-    /**
+	public function before()
+	{
+		parent::before();
+	
+		/*
+		 * 管理者ログインが必要なアクション
+		 * なし
+		 *
+		 * 管理者ログインが不要なアクション（会員用）
+		 * list
+		 */
+		$admin_login_need_action = array();
+			
+		// 現在アクティブなアクション
+		$active = Request::active()->action;
+			
+		/*
+		 * 管理者ログインが必要な画面は認証する
+		 */
+		if(in_array($active, $admin_login_need_action, true)) {
+			if (!(Auth::check() && (int)Auth::get('group') === 100)) {
+				Response::redirect('admin/login');
+			}
+		}
+	}
+	
+	/**
      * action_list
      * 試験一覧表示
      * 
@@ -25,37 +51,31 @@ class Controller_Round extends Controller_Template
 		 */
 	    $data = array('rounds');
 	    if($examnation_id) {
-            $data['rounds'] = 
-                Model_Round::query()->related('examination')
-                // JOINしたテーブルをWHEREするときはテーブル指定
-//                 ->where('examination.id', 3)
-                // FROMのテーブルをWHEREするときは指定しない（指定するとエラー）
-                ->where('examination_id', 3)
-                // ORDER BY
-                ->order_by('id', 'desc')
-                // get_oneで１レコード取得
-                ->get();
-            
-            // select 文を準備します
-//             SELECT * FROM rounds
-//             INNER JOIN examinations ON rounds.examination_id = examinations.id
-//             LEFT JOIN answers ON rounds.id = answers.round_id
-//               AND answers.finish_flag = 0
-//             WHERE rounds.examination_id = 3
-//             ORDER BY rounds.id DESC
-            $query = DB::select()->from('rounds');
-            // Join examinations table
-            $query->join('examinations', 'INNER');
-            $query->on('rounds.examination_id', '=', 'examinations.id');
-            // Join answers table
-            $query->join('answers', 'LEFT');
-            $query->on('rounds.id', '=', 'answers.round_id');
-            $query->and_on('answers.finish_flag', '=', db::expr(0));
-            $query->where('rounds.examination_id', 3);
-            $query->order_by('rounds.id', 'desc');
-            $result = $query->execute();
-            var_dump($result);
-            var_dump(count($result));
+//             $data['rounds'] = 
+//                 Model_Round::query()->related('examination')
+//                 // JOINしたテーブルをWHEREするときはテーブル指定
+// //                 ->where('examination.id', 3)
+//                 // FROMのテーブルをWHEREするときは指定しない（指定するとエラー）
+//                 ->where('examination_id', 3)
+//                 // ORDER BY
+//                 ->order_by('id', 'desc')
+//                 // get_oneで１レコード取得
+//                 ->get();
+            $data['rounds'] = DB::select(
+            					  array('rounds.id', 'round_id')
+            					, array('answers.id', 'answer_id')
+            					, array('rounds.round_name', 'round_name')
+            					, array('examinations.examination_name', 'examination_name')
+            				)
+            				->from('rounds')
+            				->join('examinations', 'INNER')
+            				->on('rounds.examination_id', '=', 'examinations.id')
+            				->join('answers', 'LEFT')
+            				->on('rounds.id', '=', 'answers.round_id')
+            				->and_on('answers.finish_flag', '=', db::expr(0))
+            				->where('rounds.examination_id', 3)
+            				->order_by('rounds.id', 'desc')
+            				->execute();
 	    }
         $this->template->title = "応用情報技術者試験午前";
 		$this->template->content = View::forge('round/list', $data);
@@ -94,111 +114,111 @@ class Controller_Round extends Controller_Template
 
 // 	}
 
-	public function action_create()
-	{
-		if (Input::method() == 'POST')
-		{
-			$val = Model_Round::validate('create');
+// 	public function action_create()
+// 	{
+// 		if (Input::method() == 'POST')
+// 		{
+// 			$val = Model_Round::validate('create');
 
-			if ($val->run())
-			{
-				$round = Model_Round::forge(array(
-					'round_name' => Input::post('round_name'),
-					'examination_id' => Input::post('examination_id'),
-					'deleted_at' => Input::post('deleted_at'),
-				));
+// 			if ($val->run())
+// 			{
+// 				$round = Model_Round::forge(array(
+// 					'round_name' => Input::post('round_name'),
+// 					'examination_id' => Input::post('examination_id'),
+// 					'deleted_at' => Input::post('deleted_at'),
+// 				));
 
-				if ($round and $round->save())
-				{
-					Session::set_flash('success', 'Added round #'.$round->id.'.');
+// 				if ($round and $round->save())
+// 				{
+// 					Session::set_flash('success', 'Added round #'.$round->id.'.');
 
-					Response::redirect('round');
-				}
+// 					Response::redirect('round');
+// 				}
 
-				else
-				{
-					Session::set_flash('error', 'Could not save round.');
-				}
-			}
-			else
-			{
-				Session::set_flash('error', $val->error());
-			}
-		}
+// 				else
+// 				{
+// 					Session::set_flash('error', 'Could not save round.');
+// 				}
+// 			}
+// 			else
+// 			{
+// 				Session::set_flash('error', $val->error());
+// 			}
+// 		}
 
-		$this->template->title = "Rounds";
-		$this->template->content = View::forge('round/create');
+// 		$this->template->title = "Rounds";
+// 		$this->template->content = View::forge('round/create');
 
-	}
+// 	}
 
-	public function action_edit($id = null)
-	{
-		is_null($id) and Response::redirect('round');
+// 	public function action_edit($id = null)
+// 	{
+// 		is_null($id) and Response::redirect('round');
 
-		if ( ! $round = Model_Round::find($id))
-		{
-			Session::set_flash('error', 'Could not find round #'.$id);
-			Response::redirect('round');
-		}
+// 		if ( ! $round = Model_Round::find($id))
+// 		{
+// 			Session::set_flash('error', 'Could not find round #'.$id);
+// 			Response::redirect('round');
+// 		}
 
-		$val = Model_Round::validate('edit');
+// 		$val = Model_Round::validate('edit');
 
-		if ($val->run())
-		{
-			$round->round_name = Input::post('round_name');
-			$round->examination_id = Input::post('examination_id');
-			$round->deleted_at = Input::post('deleted_at');
+// 		if ($val->run())
+// 		{
+// 			$round->round_name = Input::post('round_name');
+// 			$round->examination_id = Input::post('examination_id');
+// 			$round->deleted_at = Input::post('deleted_at');
 
-			if ($round->save())
-			{
-				Session::set_flash('success', 'Updated round #' . $id);
+// 			if ($round->save())
+// 			{
+// 				Session::set_flash('success', 'Updated round #' . $id);
 
-				Response::redirect('round');
-			}
+// 				Response::redirect('round');
+// 			}
 
-			else
-			{
-				Session::set_flash('error', 'Could not update round #' . $id);
-			}
-		}
+// 			else
+// 			{
+// 				Session::set_flash('error', 'Could not update round #' . $id);
+// 			}
+// 		}
 
-		else
-		{
-			if (Input::method() == 'POST')
-			{
-				$round->round_name = $val->validated('round_name');
-				$round->examination_id = $val->validated('examination_id');
-				$round->deleted_at = $val->validated('deleted_at');
+// 		else
+// 		{
+// 			if (Input::method() == 'POST')
+// 			{
+// 				$round->round_name = $val->validated('round_name');
+// 				$round->examination_id = $val->validated('examination_id');
+// 				$round->deleted_at = $val->validated('deleted_at');
 
-				Session::set_flash('error', $val->error());
-			}
+// 				Session::set_flash('error', $val->error());
+// 			}
 
-			$this->template->set_global('round', $round, false);
-		}
+// 			$this->template->set_global('round', $round, false);
+// 		}
 
-		$this->template->title = "Rounds";
-		$this->template->content = View::forge('round/edit');
+// 		$this->template->title = "Rounds";
+// 		$this->template->content = View::forge('round/edit');
 
-	}
+// 	}
 
-	public function action_delete($id = null)
-	{
-		is_null($id) and Response::redirect('round');
+// 	public function action_delete($id = null)
+// 	{
+// 		is_null($id) and Response::redirect('round');
 
-		if ($round = Model_Round::find($id))
-		{
-			$round->delete();
+// 		if ($round = Model_Round::find($id))
+// 		{
+// 			$round->delete();
 
-			Session::set_flash('success', 'Deleted round #'.$id);
-		}
+// 			Session::set_flash('success', 'Deleted round #'.$id);
+// 		}
 
-		else
-		{
-			Session::set_flash('error', 'Could not delete round #'.$id);
-		}
+// 		else
+// 		{
+// 			Session::set_flash('error', 'Could not delete round #'.$id);
+// 		}
 
-		Response::redirect('round');
+// 		Response::redirect('round');
 
-	}
+// 	}
 
 }

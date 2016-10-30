@@ -1,166 +1,174 @@
 <?php
-/**
- * Controller_Thirdcategories
- * 大項目（基礎理論・コンピュータシステムなど）
- * 今のところ増減する予定なし、あったとしても頻度は限りなく小さい
- * 当面はDB直接操作で運用
- * ↓
- * コメントアウト
- * 
- * @author sr2smail
- *
- */
-class Controller_Thirdcategories extends Controller_Template
-{
+// /**
+//  * Controller_Thirdcategories
+//  * 大項目（基礎理論・コンピュータシステムなど）
+//  * 今のところ増減する予定なし、あったとしても頻度は限りなく小さい
+//  * 当面はDB直接操作で運用
+//  * ↓
+//  * コメントアウト
+//  * 
+//  * @author sr2smail
+//  *
+//  */
+// class Controller_Thirdcategories extends Controller_Template
+// {
 	
-	public function before()
-	{
-		parent::before();
+// 	public function before()
+// 	{
+// 		parent::before();
 		
-		//許可するアクション
- 		$action = array('view');
- 		//アクティブなアクション
- 		$active = Request::active()->action;
-	 		
-		//ログイン画面にリダイレクト
-		if (!Auth::check()) {
-			Response::redirect('admin/login');
-		}
-		
-		//管理者アクセス不可の場合、管理者一覧画面にリダイレクト ※暫定
-		if (!in_array($active, $action, true)) {
-			Response::redirect('admin/index');
-		}
-	}
+// 	 	/*
+//  		 * 管理者ログインが必要なアクション
+//  		 * index
+//  		 * view
+//  		 * create
+//  		 * edit
+//  		 * delete
+//  		 * 
+//  		 */
+//  		$admin_login_need_action = array('index', 'view', 'create', 'edit', 'delete'); 
+ 		
+//  		// 現在アクティブなアクション
+//  		$active = Request::active()->action;
+ 		
+//  		/*
+//  		 * editとdeleteはログインが必要
+//  		 */
+//  		if(in_array($active, $admin_login_need_action, true)) {
+//  			if (!(Auth::check() && (int)Auth::get('group') === 100)) {
+//  				Response::redirect('admin/login');
+//  			}
+//  		}
+// 	}
 
-	public function action_index()
-	{
-		$data['thirdcategories'] = Model_Thirdcategory::find('all');
-		$this->template->title = "Thirdcategories";
-		$this->template->content = View::forge('thirdcategories/index', $data);
+// 	public function action_index()
+// 	{
+// 		$data['thirdcategories'] = Model_Thirdcategory::find('all');
+// 		$this->template->title = "Thirdcategories";
+// 		$this->template->content = View::forge('thirdcategories/index', $data);
 
-	}
+// 	}
 
-	public function action_view($id = null)
-	{
-		is_null($id) and Response::redirect('thirdcategories');
+// 	public function action_view($id = null)
+// 	{
+// 		is_null($id) and Response::redirect('thirdcategories');
 
-		if ( ! $data['thirdcategory'] = Model_Thirdcategory::find($id))
-		{
-			Session::set_flash('error', 'Could not find thirdcategory #'.$id);
-			Response::redirect('thirdcategories');
-		}
+// 		if ( ! $data['thirdcategory'] = Model_Thirdcategory::find($id))
+// 		{
+// 			Session::set_flash('error', 'Could not find thirdcategory #'.$id);
+// 			Response::redirect('thirdcategories');
+// 		}
 
-		$this->template->title = "Thirdcategory";
-		$this->template->content = View::forge('thirdcategories/view', $data);
+// 		$this->template->title = "Thirdcategory";
+// 		$this->template->content = View::forge('thirdcategories/view', $data);
 
-	}
+// 	}
 
-	public function action_create()
-	{
-		if (Input::method() == 'POST')
-		{
-			$val = Model_Thirdcategory::validate('create');
+// 	public function action_create()
+// 	{
+// 		if (Input::method() == 'POST')
+// 		{
+// 			$val = Model_Thirdcategory::validate('create');
 
-			if ($val->run())
-			{
-				$thirdcategory = Model_Thirdcategory::forge(array(
-					'topcategory_id' => Input::post('topcategory_id'),
-					'third_category_name' => Input::post('third_category_name'),
-					'deleted_at' => Input::post('deleted_at'),
-				));
+// 			if ($val->run())
+// 			{
+// 				$thirdcategory = Model_Thirdcategory::forge(array(
+// 					'topcategory_id' => Input::post('topcategory_id'),
+// 					'third_category_name' => Input::post('third_category_name'),
+// 					'deleted_at' => Input::post('deleted_at'),
+// 				));
 
-				if ($thirdcategory and $thirdcategory->save())
-				{
-					Session::set_flash('success', 'Added thirdcategory #'.$thirdcategory->id.'.');
+// 				if ($thirdcategory and $thirdcategory->save())
+// 				{
+// 					Session::set_flash('success', 'Added thirdcategory #'.$thirdcategory->id.'.');
 
-					Response::redirect('thirdcategories');
-				}
+// 					Response::redirect('thirdcategories');
+// 				}
 
-				else
-				{
-					Session::set_flash('error', 'Could not save thirdcategory.');
-				}
-			}
-			else
-			{
-				Session::set_flash('error', $val->error());
-			}
-		}
+// 				else
+// 				{
+// 					Session::set_flash('error', 'Could not save thirdcategory.');
+// 				}
+// 			}
+// 			else
+// 			{
+// 				Session::set_flash('error', $val->error());
+// 			}
+// 		}
 
-		$this->template->title = "Thirdcategories";
-		$this->template->content = View::forge('thirdcategories/create');
+// 		$this->template->title = "Thirdcategories";
+// 		$this->template->content = View::forge('thirdcategories/create');
 
-	}
+// 	}
 
-	public function action_edit($id = null)
-	{
-		is_null($id) and Response::redirect('thirdcategories');
+// 	public function action_edit($id = null)
+// 	{
+// 		is_null($id) and Response::redirect('thirdcategories');
 
-		if ( ! $thirdcategory = Model_Thirdcategory::find($id))
-		{
-			Session::set_flash('error', 'Could not find thirdcategory #'.$id);
-			Response::redirect('thirdcategories');
-		}
+// 		if ( ! $thirdcategory = Model_Thirdcategory::find($id))
+// 		{
+// 			Session::set_flash('error', 'Could not find thirdcategory #'.$id);
+// 			Response::redirect('thirdcategories');
+// 		}
 
-		$val = Model_Thirdcategory::validate('edit');
+// 		$val = Model_Thirdcategory::validate('edit');
 
-		if ($val->run())
-		{
-			$thirdcategory->topcategory_id = Input::post('topcategory_id');
-			$thirdcategory->third_category_name = Input::post('third_category_name');
-			$thirdcategory->deleted_at = Input::post('deleted_at');
+// 		if ($val->run())
+// 		{
+// 			$thirdcategory->topcategory_id = Input::post('topcategory_id');
+// 			$thirdcategory->third_category_name = Input::post('third_category_name');
+// 			$thirdcategory->deleted_at = Input::post('deleted_at');
 
-			if ($thirdcategory->save())
-			{
-				Session::set_flash('success', 'Updated thirdcategory #' . $id);
+// 			if ($thirdcategory->save())
+// 			{
+// 				Session::set_flash('success', 'Updated thirdcategory #' . $id);
 
-				Response::redirect('thirdcategories');
-			}
+// 				Response::redirect('thirdcategories');
+// 			}
 
-			else
-			{
-				Session::set_flash('error', 'Could not update thirdcategory #' . $id);
-			}
-		}
+// 			else
+// 			{
+// 				Session::set_flash('error', 'Could not update thirdcategory #' . $id);
+// 			}
+// 		}
 
-		else
-		{
-			if (Input::method() == 'POST')
-			{
-				$thirdcategory->topcategory_id = $val->validated('topcategory_id');
-				$thirdcategory->third_category_name = $val->validated('third_category_name');
-				$thirdcategory->deleted_at = $val->validated('deleted_at');
+// 		else
+// 		{
+// 			if (Input::method() == 'POST')
+// 			{
+// 				$thirdcategory->topcategory_id = $val->validated('topcategory_id');
+// 				$thirdcategory->third_category_name = $val->validated('third_category_name');
+// 				$thirdcategory->deleted_at = $val->validated('deleted_at');
 
-				Session::set_flash('error', $val->error());
-			}
+// 				Session::set_flash('error', $val->error());
+// 			}
 
-			$this->template->set_global('thirdcategory', $thirdcategory, false);
-		}
+// 			$this->template->set_global('thirdcategory', $thirdcategory, false);
+// 		}
 
-		$this->template->title = "Thirdcategories";
-		$this->template->content = View::forge('thirdcategories/edit');
+// 		$this->template->title = "Thirdcategories";
+// 		$this->template->content = View::forge('thirdcategories/edit');
 
-	}
+// 	}
 
-	public function action_delete($id = null)
-	{
-		is_null($id) and Response::redirect('thirdcategories');
+// 	public function action_delete($id = null)
+// 	{
+// 		is_null($id) and Response::redirect('thirdcategories');
 
-		if ($thirdcategory = Model_Thirdcategory::find($id))
-		{
-			$thirdcategory->delete();
+// 		if ($thirdcategory = Model_Thirdcategory::find($id))
+// 		{
+// 			$thirdcategory->delete();
 
-			Session::set_flash('success', 'Deleted thirdcategory #'.$id);
-		}
+// 			Session::set_flash('success', 'Deleted thirdcategory #'.$id);
+// 		}
 
-		else
-		{
-			Session::set_flash('error', 'Could not delete thirdcategory #'.$id);
-		}
+// 		else
+// 		{
+// 			Session::set_flash('error', 'Could not delete thirdcategory #'.$id);
+// 		}
 
-		Response::redirect('thirdcategories');
+// 		Response::redirect('thirdcategories');
 
-	}
+// 	}
 
-}
+// }

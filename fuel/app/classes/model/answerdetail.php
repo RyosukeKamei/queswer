@@ -35,6 +35,12 @@ class Model_Answerdetail extends Model
 		return $val;
 	}
 	
+	/*
+	 * answerをJOIN
+	 */
+	protected static $_belongs_to = array('answer');
+	
+	
 	/**
 	 * create_answer_details
 	 * 解答レコードを80個生成

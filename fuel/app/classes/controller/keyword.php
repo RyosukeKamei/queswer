@@ -14,20 +14,29 @@ class Controller_Keyword extends Controller_Template
 	{
 		parent::before();
 	
- 		//許可するアクション
- 		$action = array('view', 'index');
- 		//アクティブなアクション
+ 		/*
+ 		 * 管理者ログインが必要なアクション
+ 		 * edit
+ 		 * delete
+ 		 * 
+ 		 * 管理者ログインが不要なアクション
+ 		 * index
+ 		 * view
+ 		 */
+ 		$admin_login_need_action = array('edit', 'delete'); 
+ 		
+ 		// 現在アクティブなアクション
  		$active = Request::active()->action;
-	 		
-		//ログイン画面にリダイレクト
-		if (!Auth::check()) {
-			Response::redirect('admin/login');
-		}
-		
-		//管理者アクセス不可の場合、管理者一覧画面にリダイレクト ※暫定
-		if (!in_array($active, $action, true)) {
-			Response::redirect('admin/index');
-		}
+ 		
+ 		/*
+ 		 * editとdeleteはログインが必要
+ 		 */
+ 		if(in_array($active, $admin_login_need_action, true)) {
+ 			if (!(Auth::check() && (int)Auth::get('group') === 100)) {
+ 				Response::redirect('admin/login');
+ 			}
+ 		}
+
 	}
 	
 	
