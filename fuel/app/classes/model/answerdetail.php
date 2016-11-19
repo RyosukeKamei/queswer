@@ -95,5 +95,128 @@ class Model_Answerdetail extends Model
 			return true;
 		}
 	}
+	
+	/**
+	 * get_summary
+	 * サマリーを取得する
+	 * 
+	 * @param サマリーする単位 $user_summary_category
+	 * 							divitions        問題種別
+	 * 							topcategories    ストラテジ・テクノロジ・マネジメント
+	 * 							thirdcategories  大項目
+	 * 							secondcategories 中項目
+	 * 							firstcategories  小項目
+	 * @param int $examnation_id 問題区分 $examnation_id = 3 応用情報技術者試験
+	 * @param int $user_id ユーザID 
+	 * @param int $round_id 実施回 $round_id = 15 平成28年度春応用情報技術者試験
+	 */
+	public static function get_summary($user_summary_category, $examnation_id, $user_id = null, $round_id) {
+		/*
+		 * 引数がない場合の処理値はdivitions
+		 */
+		$summary_id   = 'divitions.id';
+		$summary_name = 'divitions.divition_name';
+		if($user_summary_category == 'divitions')
+		{
+			$summary_id   = 'divitions.id';
+			$summary_name = 'divitions.divition_name';
+		}
+		elseif($user_summary_category == 'topcategories')
+		{
+			$summary_id   = 'topcategories.id';
+			$summary_name = 'topcategories.top_category_name';
+		}
+		elseif($user_summary_category == 'thirdcategories')
+		{
+			$summary_id   = 'thirdcategories.id';
+			$summary_name = 'thirdcategories.third_category_name';
+		}
+		elseif($user_summary_category == 'secondcategories')
+		{
+			$summary_id   = 'secondcategories.id';
+			$summary_name = 'secondcategories.second_category_name';
+		}
+		elseif($user_summary_category == 'firstcategories')
+		{
+			$summary_id   = 'firstcategories.id';
+			$summary_name = 'firstcategories.first_category_name';
+		}
+		
+		$user_summaries = DB::select(
+				array($summary_id, 'id')
+				, array($summary_name, 'name')
+				, array(DB::EXPR('SUM(CASE WHEN `answerdetails`.`answer` = `choices`.`choice_num` THEN 1 ELSE 0 END)'), 'correct_count')
+				, array(DB::EXPR('COUNT(`answerdetails`.`id`)'), 'question_count')
+		)
+		->from('answerdetails')
+		->join('answers', 'INNER')
+		->on('answerdetails.answer_id', '=', 'answers.id')
+		->join('rounds', 'INNER')
+		->on('answers.round_id', '=', 'rounds.id')
+		->join('examinations', 'INNER')
+		->on('rounds.examination_id', '=', 'examinations.id')
+		->join('questions', 'LEFT')
+		->on('answerdetails.question_number', '=', 'questions.question_number')
+		->and_on('answers.round_id', '=', 'questions.round_id')
+		->join('choices', 'LEFT')
+		->on('questions.id', '=', 'choices.question_id')
+		->and_on('choices.correct_flag', '=', DB::EXPR(1))
+		->join('divitions', 'INNER')
+		->on('questions.divition_id', '=', 'divitions.id')
+		->join('firstcategories', 'INNER')
+		->on('questions.firstcategory_id', '=', 'firstcategories.id')
+		->join('secondcategories', 'INNER')
+		->on('firstcategories.secondcategory_id', '=', 'secondcategories.id')
+		->join('thirdcategories', 'INNER')
+		->on('secondcategories.thirdcategory_id', '=', 'thirdcategories.id')
+		->join('topcategories', 'INNER')
+		->on('thirdcategories.topcategory_id', '=', 'topcategories.id');
+		
+		/*
+		 * 試験区分
+		 * 例
+		 * 応用情報技術者試験
+		 * $examnation_id = 3
+		 */
+		if($examnation_id) 
+		{
+			$user_summaries->where('examinations.id', $examnation_id);
+		}
+		
+		/*
+		 * ユーザID
+		 * 
+		 */
+		if($user_id) 
+		{
+			$user_summaries->where('answers.user_id', $user_id);
+		}
+		
+		/*
+		 * 実施回
+		 * 
+		 */
+		if($round_id && (int)$round_id !== 9999) 
+		{
+			$user_summaries->where('answers.round_id', $round_id);
+		}
+		
+		/*
+		 * group by
+		 */
+		$user_summaries->group_by($summary_id);
+		
+		return $user_summaries->execute();		
+	}
+	
+	public static function get_summary_question_count($summaries) {
+		$summary_count = 0;
+		if($summaries) {
+			foreach($summaries AS $summary) {
+				$summary_count = $summary_count + (int)$summary['question_count'];
+			}
+		}
+		return $summary_count;
+	}
 
 }

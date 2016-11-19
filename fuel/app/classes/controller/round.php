@@ -1,6 +1,11 @@
 <?php
 class Controller_Round extends Controller_Template
 {
+	/*
+	 * ユーザID
+	 */
+	private $user_id;
+	
 	public function before()
 	{
 		parent::before();
@@ -25,6 +30,13 @@ class Controller_Round extends Controller_Template
 				Response::redirect('admin/login');
 			}
 		}
+		
+		/*
+		 * ユーザID取得
+		 */
+		$user_infos = Auth::get_user_id();
+		
+		$this->user_id = $user_infos[1]; // ユーザID取得
 	}
 	
 	/**
@@ -34,6 +46,24 @@ class Controller_Round extends Controller_Template
      */
 	public function action_list($examnation_id = null)
 	{
+	    /*
+	     * ビューに渡す値
+	     */
+		$data = array('rounds');
+
+		/*
+		 * フォームから値がくる場合を考慮
+		 * サマリーを切り替えた場合など
+		 */
+		if(!$examnation_id) {
+			$examnation_id = Input::post('examnation_id');
+		}
+		
+		/*
+		 * 試験情報を引き継ぐ
+		 */
+		$data['examnations']['examnation_id'] = $examnation_id;
+		
 		/*
 		 * Ver1.0 examinationでJOINして、試験ごとのリストを取得
 		 * 例：応用情報
@@ -49,7 +79,6 @@ class Controller_Round extends Controller_Template
 		 * 自前でSQLを書かないといけない場合は、テストを書く
 		 * 
 		 */
-	    $data = array('rounds');
 	    if($examnation_id) {
 //             $data['rounds'] = 
 //                 Model_Round::query()->related('examination')
@@ -61,23 +90,98 @@ class Controller_Round extends Controller_Template
 //                 ->order_by('id', 'desc')
 //                 // get_oneで１レコード取得
 //                 ->get();
-            $data['rounds'] = DB::select(
-            					  array('rounds.id', 'round_id')
-            					, array('answers.id', 'answer_id')
-            					, array('rounds.round_name', 'round_name')
-            					, array('examinations.examination_name', 'examination_name')
-            				)
-            				->from('rounds')
-            				->join('examinations', 'INNER')
-            				->on('rounds.examination_id', '=', 'examinations.id')
-            				->join('answers', 'LEFT')
-            				->on('rounds.id', '=', 'answers.round_id')
-            				->and_on('answers.finish_flag', '=', db::expr(0))
-            				->where('rounds.examination_id', 3)
-            				->order_by('rounds.id', 'desc')
-            				->execute();
+            /*
+             * 問題の一覧を取得
+             * 
+             * 引数
+             * 試験区分
+             * 平成28年度秋応用情報技術者試験 $examnation_id = 15
+             * 平成28年度春応用情報技術者試験 $examnation_id = 14
+             * …
+             * SQLはモデルに移動
+             */
+	    	$data['rounds'] = Model_Round::get_rounds_by_examination($examnation_id);
+	    	
+	    	/*
+	    	 * 個人の解答履歴（得意・不得意分野）
+	    	 * 初期値は問題種別（divitions）
+	    	 * 
+	    	 * 第1引数
+	    	 * サマリーする単位
+	    	 * Input::post('user_summary_category')
+	    	 *    'divitions'	     => '問題種別'
+			 *    'topcategories'    => 'テクノロジ・マネジメント・ストラテジ'
+			 *    'thirdcategories'  => '大項目'
+			 *    'secondcategories' => '中項目'
+			 *    'firstcategories'  => '小項目'
+			 * 
+			 * 第2引数
+			 * $examnation_id
+			 * 応用情報技術者試験 $examnation_id = 15
+             * 
+             * 第3引数
+             * $this->user_id ユーザID
+             * 
+	    	 * 第4引数
+	    	 * $round_id
+	    	 * 平成28年度秋応用情報技術者試験 $round_id = 15
+	    	 * 平成28年度春応用情報技術者試験 $round_id = 14
+             * 
+	    	 */
+	    	$data['user_summaries'] = Model_Answerdetail::get_summary(Input::post('user_summary_category'), $examnation_id, $this->user_id, Input::post('user_summary_round_id'));
+	    	
+	    	/*
+	    	 * 問題数を取得
+	    	 */
+	    	$data['user_summary_count'] = Model_Answerdetail::get_summary_question_count($data['user_summaries']);
+
+
+	    	/*
+	    	 * 全体の解答履歴（得意・不得意分野）
+	    	 * 初期値は問題種別（divitions）
+	    	 *
+	    	 * 第1引数
+	    	 * サマリーする単位
+	    	 * Input::post('user_summary_category')
+	    	 *    'divitions'	     => '問題種別'
+	    	 *    'topcategories'    => 'テクノロジ・マネジメント・ストラテジ'
+	    	 *    'thirdcategories'  => '大項目'
+	    	 *    'secondcategories' => '中項目'
+	    	 *    'firstcategories'  => '小項目'
+	    	 *
+	    	 * 第2引数
+	    	 * $examnation_id
+	    	 * 応用情報技術者試験 $examnation_id = 3
+	    	 *
+	    	 * 第3引数
+	    	 * ユーザID
+	    	 * null ここをnullにすることで全体の集計になる
+	    	 * 
+	    	 * 第4引数
+	    	 * $round_id
+	    	 * 平成28年度秋応用情報技術者試験 $round_id = 15
+	    	 * 平成28年度春応用情報技術者試験 $round_id = 14
+	    	 * 
+	    	 */
+	    	$data['all_summaries'] = Model_Answerdetail::get_summary(Input::post('all_summary_category'), $examnation_id, null, Input::post('all_summary_round_id'));
+	    	/*
+	    	 * 問題数を取得
+	    	 */
+	    	$data['all_summary_count'] = Model_Answerdetail::get_summary_question_count($data['all_summaries']);
+	    	
+	    	/*
+	    	 * サマリー用の実施回(rounds)
+	    	 */
+	    	$data['rounds_for_summary'] 
+	    		= Arr::pluck(Model_Round::find('all'), 'round_name', 'id');
+	    	$data['rounds_for_summary'][9999] = 'すべて 選択すると試験で絞り込みをする';
+	    	krsort($data['rounds_for_summary']);
 	    }
-        $this->template->title = "応用情報技術者試験午前";
+	    /*
+	     * 全体の解答履歴
+	     */
+	    	  
+        $this->template->title = "苦手分野がわかる！問題・解答システム！";
 		$this->template->content = View::forge('round/list', $data);
 	}
     

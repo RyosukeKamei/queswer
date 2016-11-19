@@ -33,3 +33,12 @@ span.overline {
   height: 100% !important;
 }
 
+/*
+ * セルをリンクにする
+ */
+td a.cell_link {
+	display:block;
+	width:100%;
+	height:100%;
+}
+

@@ -30,6 +30,22 @@ class Controller_Answerdetail extends Controller_Template
 		$user_id = 1;
 		
 		/*
+		 * 問題の実施回を取得
+		 * 情報の使い回し
+		 * 例：平成28年度春応用情報技術者試験
+		 */
+		$data['rounds'] = DB::select(
+	              'rounds.id'
+	            , 'rounds.round_name'
+	            , 'examinations.examination_name'
+	    )
+	    ->from('rounds')
+	    ->join('examinations', 'LEFT')
+	    ->on('rounds.examination_id', '=', 'examinations.id')
+	    ->where('rounds.id', $round_id)
+	    ->execute();
+		
+		/*
 		 * まずは解答を取得
 		 */
 		$data['answers'] = DB::select(
@@ -48,13 +64,20 @@ class Controller_Answerdetail extends Controller_Template
 	    ->where('answers.user_id', $user_id)
 	    ->execute();
 		
+		/*
+		 * 問題詳細がない場合を考慮
+		 */
+		$data['answerdetails'] = array();
+		
 		foreach($data['answers'] AS $answer_count => $answer) {
 			$data['answerdetails'][$answer_count] 
  				= DB::select(
 	            	  'answers.id'
-	            	  , 'questions.question_number'
+	            	  , 'answers.round_id'
+ 					  , 'questions.question_number'
 	            	  , 'firstcategories.first_category_name'
-	            	  , 'secondcategories.second_category_name'
+	            	  , 'firstcategories.secondcategory_id'
+ 					  , 'secondcategories.second_category_name'
 	            	  , 'thirdcategories.third_category_name'
 	            	  , 'answerdetails.answer'
 	            	  , 'choices.choice_num'
@@ -76,11 +99,43 @@ class Controller_Answerdetail extends Controller_Template
 			    ->on('secondcategories.thirdcategory_id', '=', 'thirdcategories.id')
 			    ->where('answers.id', $answer['id'])
 	    		->execute();
+			
+			$data['summary'][$answer_count]['secondcategory'] = array();
+			$data['summary'][$answer_count]['all'] = 0;
+			foreach($data['answerdetails'][$answer_count] AS $key => $records) {
+				/*
+				 * 中項目ごとに集計
+				 */	
+				if(!isset($data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_count']))
+				{
+					$data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_count'] = 1;
+					$data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_name'] = $records['second_category_name'];
+					if((int)$records['answer'] === (int)$records['choice_num']) {
+						$data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_correct_count'] = 1;
+					} else {
+						$data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_correct_count'] = 0;
+					}
+				}
+				else
+				{
+					$data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_count'] 
+						= (int)$data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_count'] + 1;
+					if((int)$records['answer'] === (int)$records['choice_num']) {
+						$data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_correct_count']
+						= $data['summary'][$answer_count]['secondcategory'][$records['second_category_name']]['second_category_correct_count'] + 1;
+					}
+				}
+
+				/*
+				 * 全体の集計数を取得
+				 */
+				if((int)$records['answer'] === (int)$records['choice_num']) {
+					$data['summary'][$answer_count]['all'] = $data['summary'][$answer_count]['all'] + 1;
+				}
+			}
 		}
 		
-		
-// var_dump($data['answerdetails']);exit();
-		$this->template->title = "解答履歴";
+		$this->template->title = $data['rounds'][0]['round_name'].$data['rounds'][0]['examination_name'];
 		$this->template->content = View::forge('answerdetail/history', $data);
 	
 	}
