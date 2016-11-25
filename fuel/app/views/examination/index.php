@@ -1,23 +1,22 @@
-<h2>Listing <span class='muted'>Examinations</span></h2>
 <br>
 <?php if ($examinations): ?>
 <table class="table table-striped">
 	<thead>
 		<tr>
-			<th>Examination name</th>
-			<th>Deleted at</th>
+			<th>資格試験名称</th>
 			<th>&nbsp;</th>
 		</tr>
 	</thead>
 	<tbody>
-<?php foreach ($examinations as $item): ?>		<tr>
+<?php foreach ($examinations as $examination): ?>		<tr>
 
-			<td><?php echo $item->examination_name; ?></td>
-			<td><?php echo $item->deleted_at; ?></td>
+			<td><?php echo $examination->examination_name; ?></td>
 			<td>
 				<div class="btn-toolbar">
 					<div class="btn-group">
-						<?php echo Html::anchor('examination/view/'.$item->id, '<i class="icon-eye-open"></i> View', array('class' => 'btn btn-default btn-sm')); ?>						<?php echo Html::anchor('examination/edit/'.$item->id, '<i class="icon-wrench"></i> Edit', array('class' => 'btn btn-default btn-sm')); ?>						<?php echo Html::anchor('examination/delete/'.$item->id, '<i class="icon-trash icon-white"></i> Delete', array('class' => 'btn btn-sm btn-danger', 'onclick' => "return confirm('Are you sure?')")); ?>					</div>
+						<?php echo Html::anchor('round/list/'.$examination->id, '<i class="icon-eye-open"></i> 過去問にチャレンジ！', array('class' => 'btn btn-primary btn-sm')); ?>
+						<?php echo Html::anchor('round/pastlist/'.$examination->id, '<i class="icon-wrench"></i> 過去問解説', array('class' => 'btn btn-info btn-sm')); ?>
+					</div>
 				</div>
 
 			</td>
@@ -26,9 +25,6 @@
 </table>
 
 <?php else: ?>
-<p>No Examinations.</p>
+<p>[FATAL ERROR] 試験がありません。</p>
 
-<?php endif; ?><p>
-	<?php echo Html::anchor('examination/create', 'Add new Examination', array('class' => 'btn btn-success')); ?>
-
-</p>
+<?php endif; ?>

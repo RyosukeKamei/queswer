@@ -5,6 +5,8 @@
 	<title><?php echo $title; ?></title>
 	<?php echo Asset::css('bootstrap.css'); ?>
 	<?php echo Asset::css('queswer.css'); ?>
+	<?php echo Asset::js("jquery.js"); ?>
+	<?php echo Asset::js("bootstrap.min.js"); ?>
 	<style>
 		body { margin: 40px; }
 	</style>

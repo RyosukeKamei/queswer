@@ -5,21 +5,22 @@
  * 今のところ増減する予定なし、あったとしても頻度は限りなく小さい
  * 当面はDB直接操作で運用
  * ↓
- * コメントアウト
+ * index以外はコメントアウト
+ * indexはトップページに利用
  * 
  * @author sr2smail
  *
  */
-// class Controller_Examination extends Controller_Template
-// {
+class Controller_Examination extends Controller_Template
+{
 
-// 	public function action_index()
-// 	{
-// 		$data['examinations'] = Model_Examination::find('all');
-// 		$this->template->title = "Examinations";
-// 		$this->template->content = View::forge('examination/index', $data);
+	public function action_index()
+	{
+		$data['examinations'] = Model_Examination::find('all');
+		$this->template->title = "IPA系国家資格 過去問チャレンジサイト";
+		$this->template->content = View::forge('examination/index', $data);
 
-// 	}
+	}
 
 // 	public function action_view($id = null)
 // 	{
@@ -140,4 +141,4 @@
 
 // 	}
 
-// }
+}

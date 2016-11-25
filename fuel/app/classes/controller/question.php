@@ -1,6 +1,10 @@
 <?php
 class Controller_Question extends Controller_Template
 {
+	/*
+	 * ユーザID
+	 */
+	private $user_id;
 	
 	public function before()
 	{
@@ -31,6 +35,13 @@ class Controller_Question extends Controller_Template
  				Response::redirect('admin/login');
  			}
  		}
+ 
+ 		/*
+ 		 * ユーザID取得
+ 		 */
+ 		$user_infos = Auth::get_user_id();
+ 		
+ 		$this->user_id = $user_infos[1]; // ユーザID取得
 	}
 	
     /**
@@ -563,12 +574,6 @@ class Controller_Question extends Controller_Template
      */
     private function answer_init($round_id) {
         /*
-         * @ToDo
-         * Oauth実装後にユーザIDを取得するロジックに変更
-         */
-    	$user_id = 1; // スタブ
-        
-        /*
          * $pdoを取得
          * トランザクションとQuesitonをINSERTした後のidを取得
          */
@@ -580,16 +585,16 @@ class Controller_Question extends Controller_Template
          * 重複防止制御
          * finish_flagが1つでも立っていれば、重複しているのでレコードは生成しない
          */
-        if(!Model_Answer::check_exist_answers ( $round_id, /* = 14 */ $user_id /* = 1 */ ))
+        if(!Model_Answer::check_exist_answers ( $round_id, /* = 14 */ $this->user_id /* = 1 */ ))
         {
 	        /*
     	     * $round_idから、前回のfrequencyを取得
         	 * 「前回の」なので + 1して「今回」にする
 	         */
-    	    $frequency_result = Model_Answer::get_answers ( $round_id, /* = 14 */ $user_id /* = 1 */ );
+    	    $frequency_result = Model_Answer::get_answers ( $round_id, /* = 14 */ $this->user_id /* = 1 */ );
         	$frequency = count($frequency_result) + 1; // 今回の実施回frequency
 
-	        $answer_id = Model_Answer::create_answer($round_id, $user_id, $frequency);
+	        $answer_id = Model_Answer::create_answer($round_id, $this->user_id, $frequency);
 
     	    if (0 < $answer_id) {
         	    /*

@@ -111,11 +111,8 @@ class Model_Answerdetail extends Model
 	 * @param int $round_id 実施回 $round_id = 15 平成28年度春応用情報技術者試験
 	 */
 	public static function get_summary($user_summary_category, $examnation_id, $user_id = null, $round_id) {
-		/*
-		 * 引数がない場合の処理値はdivitions
-		 */
-		$summary_id   = 'divitions.id';
-		$summary_name = 'divitions.divition_name';
+ 		$summary_id   = null;
+ 		$summary_name = null;
 		if($user_summary_category == 'divitions')
 		{
 			$summary_id   = 'divitions.id';
@@ -140,6 +137,8 @@ class Model_Answerdetail extends Model
 		{
 			$summary_id   = 'firstcategories.id';
 			$summary_name = 'firstcategories.first_category_name';
+		} else {
+			
 		}
 		
 		$user_summaries = DB::select(

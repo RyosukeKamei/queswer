@@ -20,15 +20,19 @@ class Controller_Answerdetail extends Controller_Template
 // 		if (!in_array($active, $action, true)) {
 // 			Response::redirect('admin/index');
 // 		}
+
+		/*
+		 * ユーザID取得
+		 */
+		$user_infos = Auth::get_user_id();
+			
+		$this->user_id = $user_infos[1]; // ユーザID取得
+		
+		echo($this->user_id);
 	}
 
 	public function action_history($round_id)
 	{
-		/*
-		 * ユーザIDはスタブ
-		 */
-		$user_id = 1;
-		
 		/*
 		 * 問題の実施回を取得
 		 * 情報の使い回し
@@ -61,7 +65,7 @@ class Controller_Answerdetail extends Controller_Template
 	    ->join('examinations', 'LEFT')
 	    ->on('rounds.examination_id', '=', 'examinations.id')
 	    ->where('answers.round_id', $round_id)
-	    ->where('answers.user_id', $user_id)
+	    ->where('answers.user_id', $this->user_id)
 	    ->execute();
 		
 		/*

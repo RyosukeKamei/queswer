@@ -36,5 +36,5 @@ class Model_Firstcategory extends Model
 	/*
 	 * secondcategoryをJOIN
 	 */
-	protected static $_belongs_to = array('secondcategory');
+	protected static $_belongs_to = array('secondcategory');	
 }
