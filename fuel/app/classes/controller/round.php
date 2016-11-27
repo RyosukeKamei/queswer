@@ -204,6 +204,7 @@ class Controller_Round extends Controller_Template
 	    		= Arr::pluck(Model_Round::find('all'), 'round_name', 'id');
 	    	$data['rounds_for_summary'][9999] = 'すべて 選択すると試験で絞り込みをする';
 	    	krsort($data['rounds_for_summary']);
+	    	
 	    }
 	    /*
 	     * 全体の解答履歴

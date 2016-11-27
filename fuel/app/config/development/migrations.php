@@ -23,6 +23,9 @@ return array(
         14 => '015_create_beforequestions',
         15 => '016_create_answers',
         16 => '017_create_answerdetails',
+        17 => '018_create_cards',
+        18 => '019_create_gotcards',
+        19 => '020_create_events',
       ),
     ),
     'module' => 

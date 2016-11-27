@@ -17,7 +17,7 @@ class Test_Model_Answer extends \TestCase
 		/*
 		 * 解答ヘッダ作成テスト
 		 */
-		$answer_id = Model_Answer::create_answer($round_id, $user_id, $frequency);
+		$answer_id = Model_Answer::create_answer($round_id, $user_id, $frequency, 0);
 		$this->assertGreaterThanOrEqual(1, /* ≦ */ $answer_id);
 		
 		/*
@@ -41,5 +41,21 @@ class Test_Model_Answer extends \TestCase
 		 */
 		$answer = Model_Answer::find($answer_id);
 		$answer->delete();
+	}
+	
+	/**
+	 * あんまりいいテストではない
+	 */
+	public function test_get_correct_count_each_topcartegory() {
+		/*
+		 * 準備
+		 */
+		$answer_id = 94;
+		
+		$correct_count = Model_Answer::get_correct_count_each_topcartegory($answer_id);
+		
+		var_dump($correct_count);
+		
+		$this->assertGreaterThanOrEqual(1, /* ≦ */ count($correct_count));
 	}
 }

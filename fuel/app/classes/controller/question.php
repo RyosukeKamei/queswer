@@ -353,7 +353,7 @@ class Controller_Question extends Controller_Template
      * @param int $round_id 実施回 平成28年度春応用情報技術者試験の場合は15
      * @param int $answer_id 一覧画面から「続き」をクリックした場合値が入る
      */
-    public function action_solve($round_id = 0, $answer_id = 0) {
+    public function action_solve($round_id = 0, $answer_id = 0, $event_id = 0) {
         /*
          * 新規の場合：answer_idなし
          * 続きの場合：answer_idあり
@@ -371,7 +371,7 @@ class Controller_Question extends Controller_Template
 	    	 * 2. 続きをする場合
     		 * ブラウザ入力された$answer_idそのまま
     		 */
-    		$answer_id = $this->answer_init($round_id);
+    		$answer_id = $this->answer_init($round_id, $event_id);
     	} elseif($answer_id) {
     		/*
     		 * 続きの場合
@@ -449,6 +449,48 @@ class Controller_Question extends Controller_Template
 			 */
 			$data['choices'] = $this->get_choices($data['questions']->id); 
         } else {
+        	echo("全問終了");
+        	
+        	/*
+        	 * カード判定ロジック
+        	 * $collect_count 正解の数
+        	 * $strategy_collect_count ストラテジの正解の数
+        	 * $strategy_count ストラテジの問題数
+        	 * $management_collect_count マネジメントの正解の数
+        	 * $management_count マネジメントの問題数
+        	 * $technology_collect_count テクノロジの正解の数
+        	 * $technology_count テクノロジの問題数
+        	 */
+        	if($collect_count >= 60) 
+        	{
+        		/*
+        		 * 60点以上
+        		 * 安全圏
+        		 */
+        	}
+        	elseif(48 <= $collect_count && $collect_count < 60) 
+        	{
+        		/*
+        		 * 48点以上60点未満
+        		 * ギリギリ合格
+        		 */
+        	}
+        	elseif(36 <= $collect_count && $collect_count < 48)
+        	{
+        		/*
+        		 * 36点以上48点未満
+        		 * もう少しで合格
+        		 */
+        	}
+        	elseif($collect_count < 36)
+        	{
+        		/*
+        		 * 36点以上48点未満
+        		 * 頑張って
+        		 */
+        	}
+        	
+        	
         	/*
         	 * answersにfinish_flagを立てる
         	 */
@@ -570,9 +612,10 @@ class Controller_Question extends Controller_Template
      * 最後にanswer_idを返す
      * 
      * @param int $round_id 問題の回数（平成28年度春応用情報技術者試験は15）
+     * @param int $event_id イベントID イベントに参加する時はevent.idが入り、イベントに参加しない場合は0が入る
      * @return int $answer_id 次の問題ID
      */
-    private function answer_init($round_id) {
+    private function answer_init($round_id, $event_id = 0) {
         /*
          * $pdoを取得
          * トランザクションとQuesitonをINSERTした後のidを取得
@@ -594,7 +637,7 @@ class Controller_Question extends Controller_Template
     	    $frequency_result = Model_Answer::get_answers ( $round_id, /* = 14 */ $this->user_id /* = 1 */ );
         	$frequency = count($frequency_result) + 1; // 今回の実施回frequency
 
-	        $answer_id = Model_Answer::create_answer($round_id, $this->user_id, $frequency);
+	        $answer_id = Model_Answer::create_answer($round_id, $this->user_id, $frequency, $event_id);
 
     	    if (0 < $answer_id) {
         	    /*

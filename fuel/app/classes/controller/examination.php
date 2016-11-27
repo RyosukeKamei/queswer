@@ -16,7 +16,26 @@ class Controller_Examination extends Controller_Template
 
 	public function action_index()
 	{
+		/*
+		 * 試験カテゴリ
+		 */
 		$data['examinations'] = Model_Examination::find('all');
+		
+		/*
+		 * 最新のイベントへのリンク
+		 */
+		$data['event'] = Model_Event::find('last');
+		
+		/*
+		 * イベント開始
+		 */
+		$data['start_event'] = Model_Event::query()
+				->related('round')
+				->related('examination')
+				->where('start_datetime', '<=', DB::EXPR('NOW()'))
+				->where('finish_datetime', '>=', DB::EXPR('NOW()'))
+				->get_one();
+		
 		$this->template->title = "IPA系国家資格 過去問チャレンジサイト";
 		$this->template->content = View::forge('examination/index', $data);
 
