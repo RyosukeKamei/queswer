@@ -1,0 +1,117 @@
+ファサードの作り方
+1. ファサードファイル
+/etfcc/app/Facades にファイルを作る
+（ほかのファイルのコピペをひな型にしてもよい）
+
+クラス名をファイル名と同じにする
+getFacadeAccessor()メソッドのreturnにメソッド名を記載
+
+例：Fasades/InvestProfitRate.php
+<?php
+namespace App\Facades;
+
+use Illuminate\Support\Facades\Facade;
+
+class InvestProfitRate extends Facade {
+    protected static function getFacadeAccessor() {
+        return 'getInvestProfitRate';
+    }
+}
+
+2. サービスファイル
+/etfcc/app/Services にファイルを作る
+（ほかのファイルのコピペをひな型にしてもよい）
+
+クラス名をファイル名をファサードと同じにする
+メソッド名をファサードで設定した名前にする
+
+例：Services/InvestProfitRate.php
+<?php
+namespace App\Services;
+
+/**
+ * InvestProfitRate
+ * 投資収益率を取得
+ *
+ * @author INVAST Securities
+ *
+ */
+class InvestProfitRate {
+    public function getInvestProfitRate() {
+        /*
+         * @todo
+         * 投資収益率は現状ダミー
+         * 計算方法がわかり次第実装
+         */
+        return 40.2;
+    }
+}
+
+3. プロバイダーファイル
+次のコマンドを実行
+ServiceProviderの前にファサードとサービスファイルのクラスと同名の名前を付ける
+$ docker exec -it Laravel-app php /var/www/html/etfcc/artisan make:provider InvestProfitRateServiceProvider
+
+/etfcc/app/Providers/
+に指定した名前のファイルが生成される
+
+register()にクラスとメソッド名を記載
+bootは空でよい
+例：InvestMethodListFormatServiceProvider.php
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class InvestProfitRateServiceProvider extends ServiceProvider
+{
+    /**
+     * Bootstrap the application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        //
+    }
+
+    /**
+     * Register the application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->bind(
+            'getInvestProfitRate',          // ファサードで設定したメソッド名
+            'App\Services\InvestProfitRate' // サービスのクラス名
+        );
+    }
+}
+
+/etfcc/config/app.php
+のprovidersにサービスプロバイダーを設定
+    'providers' => [
+        /* 略 */
+
+        //-- 投資収益率を取得
+        App\Providers\InvestProfitRateServiceProvider::class,
+
+        /* 略 */
+    ],
+
+便利なのでエイリアスも設定
+/etfcc/config/app.php
+のaliasesにファサードを設定
+    'aliases' => [
+        /* 略 */
+
+        //-- 投資収益率を取得
+        'InvestProfitRate'       => App\Facades\InvestProfitRate::class,
+
+        /* 略 */
+    ],
+    
+ビューでもコントローラでもテストでも呼び出しができる
+\InvestProfitRate::getInvestProfitRate()
