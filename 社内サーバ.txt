@@ -1,0 +1,12 @@
+社内サーバ
+192.168.112.203
+踏み台アカウント：invast / invast
+でログイン後、suしてください。　root / P@ssw0rd
+
+ssh 153.122.20.175　※踏み台サーバ
+→root/Invast123
+
+ssh 153.122.16.97　※今回立てたサーバ
+→root/Invast123
+
+su - gituser/gitgit01
